@@ -1,0 +1,29 @@
+{
+  "name": "games2watch",
+  "version": "1.0.0",
+  "description": "Games2Watch — Alle Europese voetbalwedstrijden op één plek",
+  "type": "module",
+  "scripts": {
+    "build": "echo 'Static site - no build needed'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/24sevenLeads/games2watch.git"
+  },
+  "keywords": [
+    "football",
+    "soccer",
+    "tv-guide",
+    "eredivisie",
+    "premier-league"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/24sevenLeads/games2watch/issues"
+  },
+  "homepage": "https://github.com/24sevenLeads/games2watch#readme",
+  "dependencies": {
+    "@vercel/speed-insights": "^2.0.0"
+  }
+}
