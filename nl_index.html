@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Games2Watch — Alle Europese voetbalwedstrijden op één plek. Zie waar de wedstrijd om gaat en waar je hem kunt kijken.">
+<meta property="og:title" content="Games2Watch — Europees voetbal TV-gids">
+<meta property="og:description" content="Eredivisie, Premier League, Bundesliga, La Liga, Serie A en Ligue 1. Met inzetkleuren per club en live TV-info voor Nederland.">
+<meta property="og:url" content="https://games2watch.eu/nl">
+<link rel="canonical" href="https://games2watch.eu/nl">
+<title>Games2Watch — Europees Voetbal Nederland</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0e0f11;--bg2:#16181c;--bg3:#1e2026;--border:#2a2d35;
+  --text:#e8eaf0;--muted:#6b7280;--muted2:#9ca3af;
+  --champ:#f59e0b;--cl-direct:#3b82f6;--cl-pre:#60a5fa;
+  --el-direct:#10b981;--el-pre:#34d399;--conf:#a78bfa;
+  --rel-direct:#ef4444;--rel-playoff:#f97316;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
+
+/* ── HEADER ── */
+.header{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 16px;position:sticky;top:0;z-index:100}
+.header-top{display:flex;align-items:center;justify-content:space-between;padding:12px 0 10px;border-bottom:1px solid var(--border)}
+.logo{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;letter-spacing:-0.5px;text-decoration:none;color:var(--text)}
+.logo span{color:var(--champ)}
+.logo small{font-size:12px;font-weight:600;color:var(--muted2);font-family:'Inter',sans-serif;margin-left:3px;vertical-align:middle}
+.header-meta{font-size:11px;color:var(--muted);display:flex;gap:12px;align-items:center}
+.live-dot{width:6px;height:6px;background:#ef4444;border-radius:50%;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── NAV / LEAGUE FILTER ── */
+.filters{display:flex;overflow-x:auto;scrollbar-width:none;padding:2px 0}
+.filters::-webkit-scrollbar{display:none}
+.filter-btn{font-size:12px;font-weight:500;background:none;border:none;color:var(--muted2);padding:10px 12px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .15s;flex-shrink:0}
+.filter-btn:hover{color:var(--text)}
+.filter-btn.active{color:var(--text);border-bottom-color:var(--champ)}
+
+/* ── SECONDARY FILTERS (zender) ── */
+.sec-filters{background:var(--bg2);border-bottom:1px solid var(--border);padding:8px 16px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.sec-label{font-size:10px;color:var(--muted);margin-right:2px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;white-space:nowrap}
+.tag-btn{font-size:11px;padding:3px 9px;border-radius:4px;border:1px solid var(--border);background:none;color:var(--muted2);cursor:pointer;transition:all .15s;white-space:nowrap}
+.tag-btn:hover,.tag-btn.active{background:var(--bg3);color:var(--text);border-color:var(--muted)}
+
+/* ── LEGEND ── */
+.legend{display:flex;flex-wrap:wrap;gap:6px;padding:10px 16px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.leg-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted2);cursor:pointer;padding:3px 7px;border-radius:4px;border:1px solid transparent;transition:all .15s}
+.leg-item:hover{border-color:var(--border);background:var(--bg3)}
+.leg-item.active{border-color:var(--muted);background:var(--bg3);color:var(--text)}
+.leg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+/* ── STATS BAR ── */
+.stats-bar{display:flex;align-items:stretch;background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.stats-bar::-webkit-scrollbar{display:none}
+.stat-block{display:flex;flex-direction:column;justify-content:center;padding:9px 14px;border-right:1px solid var(--border);white-space:nowrap;flex-shrink:0}
+.stat-block:last-child{border-right:none}
+.stat-label{font-size:10px;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:2px}
+.stat-value{font-size:17px;font-weight:700;font-family:'Barlow Condensed',sans-serif;letter-spacing:0.5px;line-height:1}
+.stat-block.s-free .stat-value{color:#10b981}
+.stat-block.s-paid .stat-value{color:var(--muted2)}
+.stat-block.zender{cursor:pointer;transition:background .15s}
+.stat-block.zender:hover{background:var(--bg3)}
+.stat-block.zender.active{background:var(--bg3);border-bottom:2px solid var(--champ)}
+.stat-block.zender .stat-value,.zender-name{color:var(--muted2)}
+.stat-block.zender.active .stat-value,.stat-block.zender.active .zender-name{color:var(--text)}
+.zender-name{font-size:10px;font-weight:600;margin-bottom:2px;text-transform:uppercase;letter-spacing:0.04em}
+
+/* ── MAIN CONTENT ── */
+.main{padding:14px 16px;max-width:1100px;margin:0 auto}
+
+/* Day separator */
+.day-sep{display:flex;align-items:center;gap:10px;padding:18px 0 8px}
+.day-sep:first-child{padding-top:6px}
+.day-name{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);white-space:nowrap}
+.day-line{flex:1;height:1px;background:var(--border)}
+.day-count2{font-size:11px;font-family:'Inter',sans-serif;background:var(--bg3);padding:2px 7px;border-radius:10px;color:var(--muted);white-space:nowrap}
+
+/* Match row */
+.match-row{display:grid;grid-template-columns:52px 1fr 90px;align-items:center;gap:12px;padding:9px 12px;border-radius:7px;margin-bottom:3px;background:var(--bg2);border:1px solid var(--border);transition:border-color .15s}
+.match-row:hover{border-color:#3a3d47}
+.m-time{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--text);letter-spacing:0.5px}
+.m-teams{display:flex;flex-direction:column;gap:3px}
+.m-comp{font-size:10px;color:var(--muted);display:flex;align-items:center;gap:4px;margin-bottom:2px}
+.team-line{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.team-rank{font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--muted);min-width:20px;flex-shrink:0}
+.team-name{font-weight:600;font-size:13px}
+.vs-row{font-size:10px;color:var(--muted);padding-left:26px}
+.stake-badge{font-size:9px;font-weight:600;letter-spacing:0.04em;padding:2px 6px;border-radius:3px;white-space:nowrap}
+.b-champ    {background:#f59e0b22;color:var(--champ);    border:1px solid #f59e0b44}
+.b-cl-direct{background:#3b82f622;color:var(--cl-direct);border:1px solid #3b82f644}
+.b-cl-pre   {background:#60a5fa18;color:var(--cl-pre);   border:1px solid #60a5fa35}
+.b-el-direct{background:#10b98122;color:var(--el-direct);border:1px solid #10b98144}
+.b-el-pre   {background:#34d39918;color:var(--el-pre);   border:1px solid #34d39935}
+.b-conf     {background:#a78bfa18;color:var(--conf);     border:1px solid #a78bfa35}
+.b-rel-dir  {background:#ef444422;color:var(--rel-direct);border:1px solid #ef444444}
+.b-rel-po   {background:#f9741622;color:var(--rel-playoff);border:1px solid #f9741644}
+
+/* TV badges */
+.tv-logo{font-size:10px;font-weight:600;padding:4px 8px;border-radius:4px;border:1px solid var(--border);background:var(--bg3);white-space:nowrap;display:inline-block;text-align:center;width:100%}
+.tv-logo.viaplay{border-color:#6366f150;color:#818cf8}
+.tv-logo.espn   {border-color:#ef444450;color:#f87171}
+.tv-logo.ziggo  {border-color:#f59e0b50;color:#fbbf24}
+.tv-logo.prime  {border-color:#38bdf850;color:#38bdf8}
+.tv-logo.npo    {border-color:#10b98150;color:#10b981}
+
+/* Loading / empty */
+.status-msg{padding:32px;text-align:center;color:var(--muted);font-size:13px;font-family:'Barlow Condensed',sans-serif;letter-spacing:0.5px}
+.loading-bar{width:32px;height:2px;background:var(--champ);animation:load 1s ease-in-out infinite alternate;margin:0 auto 10px;border-radius:2px}
+@keyframes load{from{width:20px;opacity:.4}to{width:80px;opacity:1}}
+
+/* Footer */
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:20px 16px;margin-top:32px}
+.footer-inner{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.footer-logo{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:var(--muted)}
+.footer-logo span{color:var(--champ)}
+.footer-links{display:flex;gap:16px}
+.footer-links a{font-size:11px;color:var(--muted);text-decoration:none;font-family:'Inter',sans-serif}
+.footer-links a:hover{color:var(--muted2)}
+.footer-source{font-size:10px;color:var(--muted);font-family:'Inter',sans-serif}
+
+@media(max-width:580px){
+  .match-row{grid-template-columns:44px 1fr 80px}
+  .main{padding:10px}
+  .sec-filters,.legend,.stats-bar{padding-left:12px;padding-right:12px}
+  .footer-inner{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-top">
+    <a class="logo" href="/nl">games2watch<span>.</span>eu <small>/nl</small></a>
+    <div class="header-meta">
+      <span style="display:flex;align-items:center;gap:4px"><div class="live-dot"></div>Live bijgewerkt</span>
+      <span id="cur-date"></span>
+    </div>
+  </div>
+  <nav class="filters" id="league-filters" aria-label="Competitie filter">
+    <button class="filter-btn active" onclick="filterLeague('all',this)">Alle competities</button>
+    <button class="filter-btn" onclick="filterLeague('pl',this)">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</button>
+    <button class="filter-btn" onclick="filterLeague('ed',this)">🇳🇱 Eredivisie</button>
+    <button class="filter-btn" onclick="filterLeague('bl',this)">🇩🇪 Bundesliga</button>
+    <button class="filter-btn" onclick="filterLeague('ll',this)">🇪🇸 La Liga</button>
+    <button class="filter-btn" onclick="filterLeague('sa',this)">🇮🇹 Serie A</button>
+    <button class="filter-btn" onclick="filterLeague('l1',this)">🇫🇷 Ligue 1</button>
+  </nav>
+</header>
+
+<!-- ZENDER FILTER -->
+<div class="sec-filters">
+  <span class="sec-label">Zender</span>
+  <button class="tag-btn" onclick="filterTV('Viaplay',this)">Viaplay</button>
+  <button class="tag-btn" onclick="filterTV('ESPN',this)">ESPN</button>
+  <button class="tag-btn" onclick="filterTV('Ziggo Sport',this)">Ziggo Sport</button>
+  <button class="tag-btn" onclick="filterTV('Prime Video',this)">Prime Video</button>
+  <button class="tag-btn" onclick="filterTV('NPO',this)">NPO (gratis)</button>
+</div>
+
+<!-- LEGEND / INZET FILTER -->
+<div class="legend" id="legend" role="group" aria-label="Filter op inzet">
+  <div class="leg-item" onclick="filterLegend('champ',this)"><div class="leg-dot" style="background:var(--champ)"></div>Kampioenschap</div>
+  <div class="leg-item" onclick="filterLegend('cl-direct',this)"><div class="leg-dot" style="background:var(--cl-direct)"></div>CL direct</div>
+  <div class="leg-item" onclick="filterLegend('cl-pre',this)"><div class="leg-dot" style="background:var(--cl-pre)"></div>CL voorronde</div>
+  <div class="leg-item" onclick="filterLegend('el-direct',this)"><div class="leg-dot" style="background:var(--el-direct)"></div>EL direct</div>
+  <div class="leg-item" onclick="filterLegend('el-pre',this)"><div class="leg-dot" style="background:var(--el-pre)"></div>EL voorronde</div>
+  <div class="leg-item" onclick="filterLegend('conf',this)"><div class="leg-dot" style="background:var(--conf)"></div>Conference League</div>
+  <div class="leg-item" onclick="filterLegend('rel-dir',this)"><div class="leg-dot" style="background:var(--rel-direct)"></div>Directe degradatie</div>
+  <div class="leg-item" onclick="filterLegend('rel-po',this)"><div class="leg-dot" style="background:var(--rel-playoff)"></div>Degradatie play-off</div>
+</div>
+
+<!-- STATS BAR -->
+<div class="stats-bar" id="stats-bar"></div>
+
+<!-- MAIN -->
+<main class="main" id="main-content">
+  <div class="status-msg">
+    <div class="loading-bar"></div>
+    Wedstrijden ophalen…
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">games2watch<span>.</span>eu</div>
+    <div class="footer-links">
+      <a href="/nl">Nederland</a>
+      <a href="/">EN (binnenkort)</a>
+      <a href="https://www.iservoetbalvanavond.nl" target="_blank" rel="noopener">TV-info bron</a>
+    </div>
+    <div class="footer-source" id="fetch-status">TV-data: laden…</div>
+  </div>
+</footer>
+
+<script>
+// ── STATIC STANDINGS & STAKE LOGIC (mirrors api/matches.js) ──
+const STANDINGS = {
+  pl:{'Arsenal FC':1,'Manchester City':2,'Manchester United':3,'Aston Villa':4,'Liverpool FC':5,'Chelsea FC':6,'Brentford FC':7,'Everton FC':8,'Fulham FC':9,'Brighton & Hove Albion':10,'Sunderland AFC':11,'Newcastle United':12,'AFC Bournemouth':13,'Crystal Palace':14,'Leeds United':15,'Nottingham Forest':16,'Tottenham Hotspur':17,'West Ham United':18,'Burnley FC':19,'Wolverhampton Wanderers':20},
+  bl:{'Bayern Munich':1,'Borussia Dortmund':2,'VfB Stuttgart':3,'RB Leipzig':4,'TSG Hoffenheim':5,'Bayer Leverkusen':6,'Eintracht Frankfurt':7,'SC Freiburg':8,'Union Berlin':9,'FC Augsburg':10,'FSV Mainz':11,'Hamburger SV':12,'Borussia Monchengladbach':13,'Werder Bremen':14,'1. FC Cologne':15,'FC St. Pauli':16,'VFL Wolfsburg':17,'1. FC Heidenheim':18},
+  ed:{'PSV':1,'Feyenoord':2,'NEC':3,'Ajax':4,'FC Twente':5,'AZ':6,'FC Utrecht':7,'sc Heerenveen':8,'Go Ahead Eagles':9,'Heracles Almelo':10,'FC Groningen':11,'Fortuna Sittard':12,'Sparta Rotterdam':13,'NAC Breda':14,'Excelsior Rotterdam':15,'FC Volendam':16,'Telstar':17,'PEC Zwolle':18},
+  ll:{'Real Madrid':1,'FC Barcelona':2,'Atletico Madrid':3,'Athletic Bilbao':4,'Villarreal CF':5,'Real Sociedad':6,'Real Betis':7,'Celta Vigo':8,'Sevilla FC':9,'Getafe CF':10,'CA Osasuna':11,'Valencia CF':12,'Rayo Vallecano':13,'Girona FC':14,'RCD Mallorca':15,'Elche CF':16,'Deportivo Alaves':17,'Levante UD':18,'Espanyol':19,'Real Oviedo':20},
+  sa:{'Inter Milano':1,'SSC Napoli':2,'Juventus Turin':3,'AC Milan':4,'Atalanta BC':5,'Lazio Rome':6,'AS Roma':7,'ACF Fiorentina':8,'Torino FC':9,'Bologna FC':10,'Udinese Calcio':11,'Como 1907':12,'US Lecce':13,'Hellas Verona':14,'Cagliari Calcio':15,'Parma Calcio':16,'US Cremonese':17,'Pisa SC':18,'Genoa CFC':19,'Sassuolo Calcio':20},
+  l1:{'Paris Saint-Germain':1,'AS Monaco':2,'Olympique Marseille':3,'Lille OSC':4,'Olympique Lyon':5,'OGC Nice':6,'Racing Club De Lens':7,'Stade Rennais FC':8,'Strasbourg Alsace':9,'Stade Brest 29':10,'Toulouse FC':11,'Paris FC':12,'Le Havre AC':13,'FC Nantes':14,'Angers SCO':15,'AJ Auxerre':16,'FC Metz':17,'FC Lorient':18},
+};
+
+const STAKE_ZONES = {
+  pl:[{max:1,key:'champ'},{max:4,key:'cl-direct'},{max:6,key:'cl-pre'},{max:7,key:'el-direct'},{max:8,key:'el-pre'},{max:10,key:'conf'},{rPO:17,rDir:18,total:20}],
+  bl:[{max:1,key:'champ'},{max:4,key:'cl-direct'},{max:5,key:'el-direct'},{max:6,key:'el-pre'},{max:7,key:'conf'},{rPO:16,rDir:17,total:18}],
+  ll:[{max:1,key:'champ'},{max:4,key:'cl-direct'},{max:6,key:'el-direct'},{max:7,key:'conf'},{rPO:18,rDir:19,total:20}],
+  sa:[{max:1,key:'champ'},{max:4,key:'cl-direct'},{max:6,key:'el-direct'},{max:7,key:'conf'},{rPO:18,rDir:19,total:20}],
+  l1:[{max:1,key:'champ'},{max:3,key:'cl-direct'},{max:4,key:'cl-pre'},{max:6,key:'el-direct'},{rPO:16,rDir:17,total:18}],
+  ed:[{max:1,key:'champ'},{max:3,key:'cl-pre'},{max:5,key:'el-pre'},{max:7,key:'conf'},{rPO:16,rDir:17,total:18}],
+};
+
+const BADGE_LABELS = {
+  champ:'Kampioenschap','cl-direct':'CL direct','cl-pre':'CL voorronde',
+  'el-direct':'EL direct','el-pre':'EL voorronde',conf:'Conference',
+  'rel-dir':'Degradatie','rel-po':'Play-off',mid:'',
+};
+
+const LEAGUE_KEYS = {
+  'eredivisie':'ed','premier league':'pl','bundesliga':'bl',
+  'la liga':'ll','serie a':'sa','ligue 1':'l1',
+};
+
+const LEAGUE_FLAGS = {ed:'🇳🇱',pl:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',bl:'🇩🇪',ll:'🇪🇸',sa:'🇮🇹',l1:'🇫🇷'};
+
+const ALL_ZENDERS = ['Viaplay','Prime Video','ESPN','Ziggo Sport','NPO'];
+
+function clubStake(leagueKey, rank) {
+  const zones = STAKE_ZONES[leagueKey];
+  if (!zones) return 'mid';
+  const last = zones[zones.length-1];
+  if (rank >= (last.rDir||last.total-1)) return 'rel-dir';
+  if (rank >= (last.rPO||last.total-2))  return 'rel-po';
+  for (const z of zones.slice(0,-1)) if (rank <= z.max) return z.key;
+  return 'mid';
+}
+
+function resolveTV(leagueKey, day, time) {
+  const map = {ed:{label:'ESPN',cls:'espn'},pl:{label:'Viaplay',cls:'viaplay'},bl:{label:'Viaplay',cls:'viaplay'},ll:{label:'Ziggo Sport',cls:'ziggo'},sa:{label:'Ziggo Sport',cls:'ziggo'},l1:{label:'Viaplay',cls:'viaplay'}};
+  const base = map[leagueKey] || {label:'?',cls:''};
+  if (leagueKey==='pl') {
+    const isSat = /za\s|zaterdag/i.test(day);
+    const h = parseInt(time);
+    if (isSat && h>=13 && h<16) return {label:'Prime Video',cls:'prime'};
+  }
+  return base;
+}
+
+// ── FALLBACK DATA (shown when API unavailable) ──
+const FALLBACK = [
+  {day:'Vr 10 apr',sk:'2026-04-10 21:00',time:'21:00',leagueKey:'pl',comp:'Premier League',home:'West Ham United',away:'Wolverhampton Wanderers'},
+  {day:'Vr 10 apr',sk:'2026-04-10 21:00',time:'21:00',leagueKey:'ed',comp:'Eredivisie',home:'FC Twente',away:'FC Volendam'},
+  {day:'Vr 10 apr',sk:'2026-04-10 20:30',time:'20:30',leagueKey:'bl',comp:'Bundesliga',home:'FC Augsburg',away:'TSG Hoffenheim'},
+  {day:'Za 11 apr',sk:'2026-04-11 13:30',time:'13:30',leagueKey:'pl',comp:'Premier League',home:'Arsenal FC',away:'AFC Bournemouth'},
+  {day:'Za 11 apr',sk:'2026-04-11 14:30',time:'14:30',leagueKey:'ed',comp:'Eredivisie',home:'Sparta Rotterdam',away:'PSV'},
+  {day:'Za 11 apr',sk:'2026-04-11 14:30',time:'14:30',leagueKey:'ed',comp:'Eredivisie',home:'Heracles Almelo',away:'Ajax'},
+  {day:'Za 11 apr',sk:'2026-04-11 15:30',time:'15:30',leagueKey:'bl',comp:'Bundesliga',home:'SC Freiburg',away:'Bayern Munich'},
+  {day:'Za 11 apr',sk:'2026-04-11 15:30',time:'15:30',leagueKey:'bl',comp:'Bundesliga',home:'Bayer Leverkusen',away:'VFL Wolfsburg'},
+  {day:'Za 11 apr',sk:'2026-04-11 15:30',time:'15:30',leagueKey:'bl',comp:'Bundesliga',home:'Borussia Monchengladbach',away:'1. FC Heidenheim'},
+  {day:'Za 11 apr',sk:'2026-04-11 16:00',time:'16:00',leagueKey:'pl',comp:'Premier League',home:'Burnley FC',away:'Brighton & Hove Albion'},
+  {day:'Za 11 apr',sk:'2026-04-11 16:15',time:'16:15',leagueKey:'ll',comp:'La Liga',home:'RCD Mallorca',away:'Real Madrid'},
+  {day:'Za 11 apr',sk:'2026-04-11 18:30',time:'18:30',leagueKey:'pl',comp:'Premier League',home:'Liverpool FC',away:'Fulham FC'},
+  {day:'Za 11 apr',sk:'2026-04-11 18:30',time:'18:30',leagueKey:'bl',comp:'Bundesliga',home:'VfB Stuttgart',away:'Borussia Dortmund'},
+  {day:'Za 11 apr',sk:'2026-04-11 20:45',time:'20:45',leagueKey:'sa',comp:'Serie A',home:'Lazio Rome',away:'Parma Calcio'},
+  {day:'Za 11 apr',sk:'2026-04-11 21:00',time:'21:00',leagueKey:'ll',comp:'La Liga',home:'Atletico Madrid',away:'FC Barcelona'},
+  {day:'Za 11 apr',sk:'2026-04-11 21:05',time:'21:05',leagueKey:'l1',comp:'Ligue 1',home:'Lille OSC',away:'Racing Club De Lens'},
+  {day:'Zo 12 apr',sk:'2026-04-12 14:30',time:'14:30',leagueKey:'ed',comp:'Eredivisie',home:'NEC',away:'Feyenoord'},
+  {day:'Zo 12 apr',sk:'2026-04-12 15:00',time:'15:00',leagueKey:'pl',comp:'Premier League',home:'Chelsea FC',away:'Manchester City'},
+  {day:'Zo 12 apr',sk:'2026-04-12 15:00',time:'15:00',leagueKey:'sa',comp:'Serie A',home:'Inter Milano',away:'AS Roma'},
+  {day:'Zo 12 apr',sk:'2026-04-12 16:45',time:'16:45',leagueKey:'ed',comp:'Eredivisie',home:'AZ',away:'sc Heerenveen'},
+  {day:'Zo 12 apr',sk:'2026-04-12 20:45',time:'20:45',leagueKey:'l1',comp:'Ligue 1',home:'AS Monaco',away:'Olympique Marseille'},
+  {day:'Ma 13 apr',sk:'2026-04-13 20:45',time:'20:45',leagueKey:'sa',comp:'Serie A',home:'SSC Napoli',away:'AC Milan'},
+  {day:'Ma 13 apr',sk:'2026-04-13 21:00',time:'21:00',leagueKey:'pl',comp:'Premier League',home:'Manchester United',away:'Leeds United'},
+  {day:'Ma 13 apr',sk:'2026-04-13 21:00',time:'21:00',leagueKey:'ll',comp:'La Liga',home:'Girona FC',away:'Villarreal CF'},
+].map(m => enrichMatch(m));
+
+function enrichMatch(m) {
+  const s  = STANDINGS[m.leagueKey] || {};
+  const rH = s[m.home] || 9, rA = s[m.away] || 9;
+  return {
+    ...m,
+    rH, rA,
+    flag: LEAGUE_FLAGS[m.leagueKey] || '🌍',
+    tv:   resolveTV(m.leagueKey, m.day, m.time),
+    stakeH: clubStake(m.leagueKey, rH),
+    stakeA: clubStake(m.leagueKey, rA),
+  };
+}
+
+// ── STATE ──
+let MATCHES = [];
+let activeLeague = 'all', activeLegend = null, activeTV = null;
+
+// ── FILTERS ──
+function filterLeague(v,btn){activeLeague=v;document.querySelectorAll('#league-filters .filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');render();}
+function filterTV(v,btn){
+  activeTV=activeTV===v?null:v;
+  document.querySelectorAll('.sec-filters .tag-btn,.stat-block.zender').forEach(b=>b.classList.remove('active'));
+  if(activeTV){btn.classList.add('active');document.querySelectorAll('.stat-block.zender').forEach(b=>{if(b.dataset.tv===activeTV)b.classList.add('active');});}
+  render();
+}
+function filterZenderStat(v,el){
+  activeTV=activeTV===v?null:v;
+  document.querySelectorAll('.sec-filters .tag-btn,.stat-block.zender').forEach(b=>b.classList.remove('active'));
+  if(activeTV){el.classList.add('active');document.querySelectorAll('.sec-filters .tag-btn').forEach(b=>{if(b.textContent.trim()===activeTV)b.classList.add('active');});}
+  render();
+}
+function filterLegend(v,el){
+  activeLegend=activeLegend===v?null:v;
+  document.querySelectorAll('#legend .leg-item').forEach(b=>b.classList.remove('active'));
+  if(activeLegend) el.classList.add('active');
+  render();
+}
+function getFiltered(){
+  return MATCHES.filter(m=>{
+    if(activeLeague!=='all'&&m.leagueKey!==activeLeague) return false;
+    if(activeLegend&&m.stakeH!==activeLegend&&m.stakeA!==activeLegend) return false;
+    if(activeTV&&m.tv.label!==activeTV) return false;
+    return true;
+  });
+}
+
+// ── RENDER ──
+function badgeHtml(key){
+  const label=BADGE_LABELS[key];
+  if(!label) return '';
+  return `<span class="stake-badge b-${key}">${label}</span>`;
+}
+
+function renderStats(filtered){
+  const total=filtered.length;
+  const free=filtered.filter(m=>m.tv.free).length;
+  const paid=total-free;
+  const zC={};
+  filtered.forEach(m=>{zC[m.tv.label]=(zC[m.tv.label]||0)+1;});
+  let h=`<div class="stat-block"><div class="stat-label">Totaal</div><div class="stat-value">${total}</div></div>
+    <div class="stat-block s-free"><div class="stat-label">Gratis</div><div class="stat-value">${free}</div></div>
+    <div class="stat-block s-paid"><div class="stat-label">Betaald</div><div class="stat-value">${paid}</div></div>`;
+  ALL_ZENDERS.forEach(z=>{
+    const n=zC[z];if(!n)return;
+    const ac=activeTV===z?'active':'';
+    h+=`<div class="stat-block zender ${ac}" data-tv="${z}" onclick="filterZenderStat('${z}',this)"><div class="zender-name">${z}</div><div class="stat-value">${n}</div></div>`;
+  });
+  document.getElementById('stats-bar').innerHTML=h;
+}
+
+function render(){
+  const filtered=getFiltered();
+  renderStats(filtered);
+  if(!filtered.length){
+    document.getElementById('main-content').innerHTML='<div class="status-msg">Geen wedstrijden gevonden voor deze selectie.</div>';
+    return;
+  }
+  const byDay={};
+  const dayOrder=[];
+  filtered.forEach(m=>{
+    if(!byDay[m.day]){byDay[m.day]=[];dayOrder.push(m.day);}
+    byDay[m.day].push(m);
+  });
+  let html='';
+  dayOrder.forEach(day=>{
+    const list=byDay[day];
+    html+=`<div class="day-sep"><div class="day-name">${day}</div><div class="day-line"></div><div class="day-count2">${list.length}</div></div>`;
+    list.forEach(m=>{
+      html+=`<div class="match-row">
+        <div class="m-time">${m.time}</div>
+        <div class="m-teams">
+          <div class="m-comp">${m.flag} ${m.comp}</div>
+          <div class="team-line"><span class="team-rank">#${m.rH}</span><span class="team-name">${m.home}</span>${badgeHtml(m.stakeH)}</div>
+          <div class="vs-row">vs</div>
+          <div class="team-line"><span class="team-rank">#${m.rA}</span><span class="team-name">${m.away}</span>${badgeHtml(m.stakeA)}</div>
+        </div>
+        <div><div class="tv-logo ${m.tv.cls}">${m.tv.label}</div></div>
+      </div>`;
+    });
+  });
+  document.getElementById('main-content').innerHTML=html;
+}
+
+// ── LOAD DATA ──
+async function loadMatches() {
+  try {
+    const res  = await fetch('/api/matches');
+    const data = await res.json();
+    if (data.matches && data.matches.length > 0) {
+      MATCHES = data.matches
+        .map(m => ({
+          ...m,
+          flag: LEAGUE_FLAGS[m.leagueKey] || '🌍',
+          sk: m.sk || (m.day + ' ' + m.time),
+        }))
+        .sort((a,b) => (a.sk||'').localeCompare(b.sk||''));
+      document.getElementById('fetch-status').textContent =
+        `TV-data via iservoetbalvanavond.nl · ${new Date(data.fetched_at).toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'})}`;
+    } else {
+      throw new Error('empty');
+    }
+  } catch(e) {
+    // Use fallback static data
+    MATCHES = [...FALLBACK].sort((a,b)=>a.sk.localeCompare(b.sk));
+    document.getElementById('fetch-status').textContent = 'TV-data: statische weergave (demo)';
+  }
+  render();
+}
+
+// ── INIT ──
+document.getElementById('cur-date').textContent =
+  new Date().toLocaleDateString('nl-NL',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+loadMatches();
+</script>
+</body>
+</html>
