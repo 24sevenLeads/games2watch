@@ -119,6 +119,36 @@ export default async function handler(req, res) {
   const dateTo   = toDateStr(future);
 
   try {
+    // Haal TV-zenderinfo op van iservoetbalvanavond.nl (parallel)
+    let tvLookup = {};
+    try {
+      const tvBase = process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : 'http://localhost:3000';
+      const tvRes = await fetch(`${tvBase}/api/tv`);
+      if (tvRes.ok) {
+        const tvData = await tvRes.json();
+        tvLookup = tvData.lookup || {};
+        console.log(`[matches.js] TV lookup: ${Object.keys(tvLookup).length} wedstrijden`);
+      }
+    } catch (tvErr) {
+      console.warn('[matches.js] TV lookup mislukt:', tvErr.message);
+    }
+
+    // Zoek TV op teamnaam — eerst exacte match, dan fuzzy, dan fallback per competitie
+    function findTV(home, away, leagueKey, dateStr, timeStr) {
+      const h = home.toLowerCase().trim();
+      const a = away.toLowerCase().trim();
+      if (tvLookup[`${h}|${a}`]) return tvLookup[`${h}|${a}`];
+      const hw = h.split(/\s+/)[0];
+      const aw = a.split(/\s+/)[0];
+      for (const [k, v] of Object.entries(tvLookup)) {
+        const [kh, ka] = k.split('|');
+        if (kh && ka && kh.includes(hw) && ka.includes(aw)) return v;
+      }
+      return getTV(leagueKey, dateStr, timeStr);
+    }
+
     // Haal alle competities sequentieel op (rate limit: 10 calls/minuut)
     const matches = [];
 
@@ -128,14 +158,10 @@ export default async function handler(req, res) {
         const stand  = STANDINGS[league.key] || {};
 
         for (const ev of events) {
-          // football-data.org geeft UTC tijdstip
           const utcDate = new Date(ev.utcDate);
-
-          // Omzetten naar CEST (UTC+2 zomer, UTC+1 winter)
-          // Simpele benadering: detecteer zomertijd op basis van datum
-          const month = utcDate.getUTCMonth() + 1;
-          const offset = (month >= 4 && month <= 10) ? 2 : 1; // CEST of CET
-          const local  = new Date(utcDate.getTime() + offset * 3600 * 1000);
+          const month   = utcDate.getUTCMonth() + 1;
+          const offset  = (month >= 4 && month <= 10) ? 2 : 1;
+          const local   = new Date(utcDate.getTime() + offset * 3600 * 1000);
 
           const dateStr = local.toISOString().split('T')[0];
           const timeStr = local.toTimeString().substring(0, 5);
@@ -159,16 +185,14 @@ export default async function handler(req, res) {
             rH, rA,
             stakeH:    rH ? clubStake(league.key, rH) : 'mid',
             stakeA:    rA ? clubStake(league.key, rA) : 'mid',
-            tv:        getTV(league.key, dateStr, timeStr),
+            tv:        findTV(home, away, league.key, dateStr, timeStr),
           });
         }
 
-        // Kleine pauze tussen calls om rate limit te respecteren
         await new Promise(r => setTimeout(r, 200));
 
       } catch (leagueErr) {
         console.error(`[${league.key}] error:`, leagueErr.message);
-        // Doorgaan met de rest van de competities
       }
     }
 
