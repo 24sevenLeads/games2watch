@@ -148,14 +148,10 @@ async function fetchTVLookup() {
   }
 }
 
-function defaultTV(leagueKey, dateStr, timeStr) {
-  const hour = parseInt((timeStr || '00:00').split(':')[0]);
-  const dow  = new Date((dateStr || '2026-01-01') + 'T12:00:00Z').getDay();
-  if (leagueKey === 'pl') {
-    if (dow === 6 && hour >= 13 && hour < 16) return { label: 'Prime Video', cls: 'prime', free: false };
-    return { label: 'Viaplay', cls: 'viaplay', free: false };
-  }
+// Fallback: alleen zendernaam, geen gratis/betaald gok
+function defaultTV(leagueKey) {
   const map = {
+    pl: { label: 'Viaplay',     cls: 'viaplay', free: false },
     bl: { label: 'Viaplay',     cls: 'viaplay', free: false },
     ed: { label: 'ESPN',        cls: 'espn',    free: false },
     ll: { label: 'Ziggo Sport', cls: 'ziggo',   free: false },
@@ -176,7 +172,7 @@ function findTV(home, away, leagueKey, dateStr, timeStr, tvLookup) {
     const [kh, ka] = k.split('|||');
     if (kh && ka && kh.startsWith(hw) && ka.startsWith(aw)) return v;
   }
-  return defaultTV(leagueKey, dateStr, timeStr);
+  return defaultTV(leagueKey);
 }
 
 const STANDINGS = {
