@@ -97,7 +97,9 @@ async function fetchLeague(league, dateFrom, dateTo, apiKey) {
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=1800');
+  // Cache 24 uur op Vercel's CDN — iedereen krijgt dezelfde gecachte response
+  // stale-while-revalidate: terwijl de cache ververst wordt, krijgt de bezoeker de oude data
+  res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=3600');
 
   const apiKey = process.env.FOOTBALL_DATA_KEY;
   if (!apiKey) {
