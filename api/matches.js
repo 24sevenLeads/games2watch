@@ -1,7 +1,4 @@
-// api/matches.js — v11
-// TV-parser werkt op de markdown-structuur van iservoetbalvanavond.nl
-// Teamnamen worden gematcht via een uitgebreide alias-tabel
-
+// api/matches.js — v12
 const BASE_URL  = 'https://api.football-data.org/v4';
 const TV_SOURCE = 'https://www.iservoetbalvanavond.nl';
 
@@ -15,79 +12,69 @@ const LEAGUES = [
   { key: 'cl',  code: 'CL',  name: 'Champions League', flag: '🏆' },
 ];
 
-// Vertaaltabel: naam op iservoetbalvanavond.nl → naam bij football-data.org
-// Format: 'isvoetbal naam': 'football-data naam'
+// iservoetbalvanavond naam → football-data naam
 const NAME_MAP = {
-  // Premier League
-  'manchester united':        'Manchester United FC',
-  'leeds united':             'Leeds United FC',
-  'liverpool':                'Liverpool FC',
-  'arsenal':                  'Arsenal FC',
-  'chelsea':                  'Chelsea FC',
-  'manchester city':          'Manchester City FC',
-  'tottenham hotspur':        'Tottenham Hotspur FC',
-  'aston villa':              'Aston Villa FC',
-  'newcastle united':         'Newcastle United FC',
-  'west ham united':          'West Ham United FC',
-  'everton':                  'Everton FC',
-  'fulham':                   'Fulham FC',
-  'brentford':                'Brentford FC',
-  'brighton':                 'Brighton & Hove Albion FC',
-  'crystal palace':           'Crystal Palace FC',
-  'nottingham forest':        'Nottingham Forest FC',
-  'bournemouth':              'AFC Bournemouth',
-  'afc bournemouth':          'AFC Bournemouth',
-  'wolverhampton wanderers':  'Wolverhampton Wanderers FC',
-  'sunderland':               'Sunderland AFC',
-  'burnley':                  'Burnley FC',
-  // Champions League
-  'atlético madrid':          'Club Atlético de Madrid',
-  'atletico madrid':          'Club Atlético de Madrid',
-  'fc barcelona':             'FC Barcelona',
-  'barcelona':                'FC Barcelona',
-  'real madrid c.f.':        'Real Madrid CF',
-  'real madrid':              'Real Madrid CF',
-  'fc bayern münchen':        'FC Bayern München',
-  'bayern münchen':           'FC Bayern München',
+  'manchester united': 'Manchester United FC',
+  'leeds united': 'Leeds United FC',
+  'liverpool': 'Liverpool FC',
+  'arsenal': 'Arsenal FC',
+  'chelsea': 'Chelsea FC',
+  'manchester city': 'Manchester City FC',
+  'tottenham hotspur': 'Tottenham Hotspur FC',
+  'aston villa': 'Aston Villa FC',
+  'newcastle united': 'Newcastle United FC',
+  'west ham united': 'West Ham United FC',
+  'everton': 'Everton FC',
+  'fulham': 'Fulham FC',
+  'brentford': 'Brentford FC',
+  'brighton': 'Brighton & Hove Albion FC',
+  'crystal palace': 'Crystal Palace FC',
+  'nottingham forest': 'Nottingham Forest FC',
+  'bournemouth': 'AFC Bournemouth',
+  'afc bournemouth': 'AFC Bournemouth',
+  'wolverhampton wanderers': 'Wolverhampton Wanderers FC',
+  'sunderland': 'Sunderland AFC',
+  'burnley': 'Burnley FC',
+  'atlético madrid': 'Club Atlético de Madrid',
+  'atletico madrid': 'Club Atlético de Madrid',
+  'fc barcelona': 'FC Barcelona',
+  'barcelona': 'FC Barcelona',
+  'real madrid c.f.': 'Real Madrid CF',
+  'real madrid': 'Real Madrid CF',
+  'fc bayern münchen': 'FC Bayern München',
+  'bayern münchen': 'FC Bayern München',
   'paris saint-germain f.c.': 'Paris Saint-Germain FC',
-  'paris saint-germain':      'Paris Saint-Germain FC',
-  // Eredivisie
-  'ajax':                     'AFC Ajax',
-  'psv':                      'PSV',
-  'feyenoord':                'Feyenoord',
-  'az':                       'AZ',
-  'fc twente':                'FC Twente',
-  'nec':                      'NEC Nijmegen',
-  'n.e.c.':                   'NEC Nijmegen',
-  'fc utrecht':               'FC Utrecht',
-  'sc heerenveen':            'sc Heerenveen',
-  'sc heerenveen':            'sc Heerenveen',
-  'go ahead eagles':          'Go Ahead Eagles',
-  'heracles almelo':          'Heracles Almelo',
-  'fc groningen':             'FC Groningen',
-  'fortuna sittard':          'Fortuna Sittard',
-  'sparta rotterdam':         'Sparta Rotterdam',
-  'nac breda':                'NAC Breda',
-  'excelsior rotterdam':      'Excelsior Rotterdam',
-  'fc volendam':              'FC Volendam',
-  'telstar':                  'Telstar 1963',
-  'pec zwolle':               'PEC Zwolle',
-  // La Liga
-  'levante ud':               'Levante UD',
-  'getafe cf':                'Getafe CF',
-  'celta de vigo':            'RC Celta de Vigo',
-  'real betis':               'Real Betis Balompié',
-  // Bundesliga
-  'sc freiburg':              'SC Freiburg',
-  // Serie A
-  'fiorentina':               'ACF Fiorentina',
-  'acf fiorentina':           'ACF Fiorentina',
-  'lazio':                    'SS Lazio',
-  'ss lazio':                 'SS Lazio',
-  'aston villa':              'Aston Villa FC',
-  'bologna f.c. 1909':        'Bologna FC 1909',
-  'bologna':                  'Bologna FC 1909',
-  'nottingham forest':        'Nottingham Forest FC',
+  'paris saint-germain': 'Paris Saint-Germain FC',
+  'ajax': 'AFC Ajax',
+  'psv': 'PSV',
+  'feyenoord': 'Feyenoord',
+  'az': 'AZ',
+  'fc twente': 'FC Twente',
+  'nec': 'NEC Nijmegen',
+  'n.e.c.': 'NEC Nijmegen',
+  'fc utrecht': 'FC Utrecht',
+  'sc heerenveen': 'sc Heerenveen',
+  'go ahead eagles': 'Go Ahead Eagles',
+  'heracles almelo': 'Heracles Almelo',
+  'fc groningen': 'FC Groningen',
+  'fortuna sittard': 'Fortuna Sittard',
+  'sparta rotterdam': 'Sparta Rotterdam',
+  'nac breda': 'NAC Breda',
+  'excelsior rotterdam': 'Excelsior Rotterdam',
+  'fc volendam': 'FC Volendam',
+  'telstar': 'Telstar 1963',
+  'pec zwolle': 'PEC Zwolle',
+  'levante ud': 'Levante UD',
+  'getafe cf': 'Getafe CF',
+  'celta de vigo': 'RC Celta de Vigo',
+  'real betis': 'Real Betis Balompié',
+  'sc freiburg': 'SC Freiburg',
+  'fiorentina': 'ACF Fiorentina',
+  'acf fiorentina': 'ACF Fiorentina',
+  'lazio': 'SS Lazio',
+  'ss lazio': 'SS Lazio',
+  'bologna f.c. 1909': 'Bologna FC 1909',
+  'bologna': 'Bologna FC 1909',
 };
 
 function normalizeChannel(raw) {
@@ -107,66 +94,53 @@ function normalizeChannel(raw) {
   return { label: name, cls: 'other', free: false };
 }
 
-// Parse de markdown-output van iservoetbalvanavond.nl
-// Structuur: ## Dag | HH:MM | tabelrij met [Team](url) en zender
 async function fetchTVLookup() {
   try {
     const res = await fetch(TV_SOURCE, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36' },
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
     });
     if (!res.ok) return {};
     const html = await res.text();
 
-    // Converteer HTML naar markdown-achtige structuur
-    // Bewaar ankertekst (teamnamen en zenders zitten in links)
     let md = html
       .replace(/<script[\s\S]*?<\/script>/gi, '')
       .replace(/<style[\s\S]*?<\/style>/gi, '')
-      .replace(/<a[^>]*href="([^"]*)"[^>]*>\s*([^<]+?)\s*<\/a>/gi, (_, href, text) => text.trim())
-      .replace(/<h2[^>]*>/gi, '\n##')
-      .replace(/<\/h2>/gi, '\n')
+      .replace(/<a[^>]*>\s*([^<]+?)\s*<\/a>/gi, (_, t) => t.trim())
       .replace(/<tr[^>]*>/gi, '\nROW|')
       .replace(/<td[^>]*>/gi, 'CELL|')
       .replace(/<[^>]+>/g, '')
       .replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ').replace(/&#\d+;/g, '');
 
-    const lookup = {}; // key: football-data teamnaam lowercase → tv object
+    // lookup: fd-teamnaam-lowercase → tv object
+    const lookup = {};
 
     for (const line of md.split('\n')) {
       if (!line.startsWith('ROW|')) continue;
-
       const cells = line.split('CELL|')
         .map(c => c.replace(/\s+/g, ' ').trim())
-        .filter(c => c && !c.startsWith('ROW') && !/^[\-\s]+$/.test(c));
+        .filter(c => c && !/^[\-\s]+$/.test(c) && !c.includes('Logo'));
 
-      // Zoek cel met twee teamnamen (gescheiden door 2+ spaties)
-      // en cel met zender
       let home = null, away = null, channel = null;
-
       for (const cell of cells) {
-        if (cell.includes('Logo')) continue;
-
-        const parts = cell.split(/\s{2,}/).map(p => p.trim()).filter(p => p.length > 1 && !p.includes('Logo'));
-
+        const parts = cell.split(/\s{2,}/).map(p => p.trim()).filter(p => p.length > 1);
         if (parts.length >= 2 && !home) {
-          home = parts[0];
-          away = parts[1];
+          home = parts[0]; away = parts[1];
           if (parts.length > 2) channel = parts[parts.length - 1];
-        } else if (home && !channel && cell.length > 0 && cell.length < 35) {
-          // Eerste zender pakken bij meerdere (bijv "Viaplay TV  Viaplay" → "Viaplay TV")
+        } else if (home && !channel && cell.length < 35) {
           channel = cell.split(/\s{2,}/)[0].trim();
         }
       }
 
       if (home && away && channel) {
         const tv = normalizeChannel(channel);
-        if (tv) {
-          // Sla op onder beide namen (iservoetbalvanavond naam)
-          lookup[home.toLowerCase()] = { away: away.toLowerCase(), tv };
-        }
+        if (!tv) continue;
+        // Vertaal naar football-data naam en sla op
+        const fdHome = NAME_MAP[home.toLowerCase()] || home;
+        const fdAway = NAME_MAP[away.toLowerCase()] || away;
+        const key = `${fdHome.toLowerCase()}|||${fdAway.toLowerCase()}`;
+        lookup[key] = tv;
       }
     }
-
     return lookup;
   } catch(e) {
     console.error('[tv]', e.message);
@@ -192,31 +166,18 @@ function defaultTV(leagueKey, dateStr, timeStr) {
   return map[leagueKey] || { label: '?', cls: 'other', free: false };
 }
 
-// Zoek TV op basis van football-data.org teamnaam
-// Via NAME_MAP: football-data naam → iservoetbalvanavond naam → TV
-function findTV(fdHome, fdAway, leagueKey, dateStr, timeStr, tvLookup) {
-  // Zoek de iservoetbalvanavond naam voor dit team
-  const fdH = fdHome.toLowerCase();
-  const fdA = fdAway.toLowerCase();
-
-  // Directe lookup via NAME_MAP omgekeerd
-  // Zoek in tvLookup: voor elk entry kijk of de isvoetbal-naam matcht met de fd naam
-  for (const [isHome, entry] of Object.entries(tvLookup)) {
-    const mappedHome = NAME_MAP[isHome] || null;
-    const mappedAway = NAME_MAP[entry.away] || null;
-
-    // Match als de gemapte naam overeenkomt met football-data naam
-    const homeMatch = mappedHome
-      ? mappedHome.toLowerCase() === fdH
-      : fdH.includes(isHome) || isHome.includes(fdH.split(' ')[0]);
-
-    const awayMatch = mappedAway
-      ? mappedAway.toLowerCase() === fdA
-      : fdA.includes(entry.away) || entry.away.includes(fdA.split(' ')[0]);
-
-    if (homeMatch && awayMatch) return entry.tv;
+function findTV(home, away, leagueKey, dateStr, timeStr, tvLookup) {
+  const h = home.toLowerCase();
+  const a = away.toLowerCase();
+  // Exacte match
+  if (tvLookup[`${h}|||${a}`]) return tvLookup[`${h}|||${a}`];
+  // Fuzzy: eerste woord
+  const hw = h.split(/[\s\-]+/)[0];
+  const aw = a.split(/[\s\-]+/)[0];
+  for (const [k, v] of Object.entries(tvLookup)) {
+    const [kh, ka] = k.split('|||');
+    if (kh && ka && kh.startsWith(hw) && ka.startsWith(aw)) return v;
   }
-
   return defaultTV(leagueKey, dateStr, timeStr);
 }
 
@@ -259,10 +220,10 @@ function dutchDayLabel(dateStr) {
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=3600');
 
   const apiKey = process.env.FOOTBALL_DATA_KEY;
   if (!apiKey) {
+    res.setHeader('Cache-Control', 'no-store');
     return res.status(500).json({ source: 'error', error: 'FOOTBALL_DATA_KEY niet ingesteld', count: 0, matches: [] });
   }
 
@@ -273,7 +234,6 @@ export default async function handler(req, res) {
   const dateTo   = toDateStr(future);
 
   try {
-    // TV lookup en wedstrijden parallel
     const tvPromise = fetchTVLookup();
 
     const leagueResults = await Promise.all(
@@ -281,11 +241,11 @@ export default async function handler(req, res) {
         try {
           const url = `${BASE_URL}/competitions/${league.code}/matches?dateFrom=${dateFrom}&dateTo=${dateTo}&status=SCHEDULED`;
           const r = await fetch(url, { headers: { 'X-Auth-Token': apiKey } });
-          if (!r.ok) return { league, events: [] };
+          if (!r.ok) return { league, events: [], status: r.status };
           const data = await r.json();
-          return { league, events: data.matches || [] };
+          return { league, events: data.matches || [], status: 200 };
         } catch(e) {
-          return { league, events: [] };
+          return { league, events: [], error: e.message };
         }
       })
     );
@@ -293,7 +253,13 @@ export default async function handler(req, res) {
     const tvLookup = await tvPromise;
 
     const matches = [];
-    for (const { league, events } of leagueResults) {
+    const errors  = [];
+
+    for (const { league, events, status, error } of leagueResults) {
+      if (error || (status && status !== 200)) {
+        errors.push(`${league.code}: ${error || status}`);
+        continue;
+      }
       const stand = STANDINGS[league.key] || {};
       for (const ev of events) {
         const utcDate = new Date(ev.utcDate);
@@ -322,14 +288,23 @@ export default async function handler(req, res) {
 
     matches.sort((a, b) => a.sk.localeCompare(b.sk));
 
+    // Alleen cachen als er echt wedstrijden zijn — nooit een lege response cachen
+    if (matches.length > 0) {
+      res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=3600');
+    } else {
+      res.setHeader('Cache-Control', 'no-store');
+    }
+
     return res.status(200).json({
       source: 'football-data.org + iservoetbalvanavond.nl',
       fetched_at: new Date().toISOString(),
       count: matches.length,
+      ...(errors.length > 0 ? { errors } : {}),
       matches,
     });
 
   } catch (err) {
+    res.setHeader('Cache-Control', 'no-store');
     console.error('[matches.js] fatal:', err.message);
     return res.status(500).json({ source: 'error', error: err.message, count: 0, matches: [] });
   }
