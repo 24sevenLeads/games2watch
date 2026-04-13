@@ -1,4 +1,7 @@
 // api/matches.js — v12
+// Wedstrijddata: football-data.org | TV-info: iservoetbalvanavond.nl
+// Lege responses worden NOOIT gecached (voorkomt 24u vastzitten bij 429)
+
 const BASE_URL  = 'https://api.football-data.org/v4';
 const TV_SOURCE = 'https://www.iservoetbalvanavond.nl';
 
@@ -12,7 +15,7 @@ const LEAGUES = [
   { key: 'cl',  code: 'CL',  name: 'Champions League', flag: '🏆' },
 ];
 
-// iservoetbalvanavond naam → football-data naam
+// iservoetbalvanavond.nl naam → football-data.org naam
 const NAME_MAP = {
   'manchester united': 'Manchester United FC',
   'leeds united': 'Leeds United FC',
@@ -75,6 +78,8 @@ const NAME_MAP = {
   'ss lazio': 'SS Lazio',
   'bologna f.c. 1909': 'Bologna FC 1909',
   'bologna': 'Bologna FC 1909',
+  'aston villa': 'Aston Villa FC',
+  'nottingham forest': 'Nottingham Forest FC',
 };
 
 function normalizeChannel(raw) {
@@ -111,9 +116,7 @@ async function fetchTVLookup() {
       .replace(/<[^>]+>/g, '')
       .replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ').replace(/&#\d+;/g, '');
 
-    // lookup: fd-teamnaam-lowercase → tv object
     const lookup = {};
-
     for (const line of md.split('\n')) {
       if (!line.startsWith('ROW|')) continue;
       const cells = line.split('CELL|')
@@ -134,16 +137,13 @@ async function fetchTVLookup() {
       if (home && away && channel) {
         const tv = normalizeChannel(channel);
         if (!tv) continue;
-        // Vertaal naar football-data naam en sla op
         const fdHome = NAME_MAP[home.toLowerCase()] || home;
         const fdAway = NAME_MAP[away.toLowerCase()] || away;
-        const key = `${fdHome.toLowerCase()}|||${fdAway.toLowerCase()}`;
-        lookup[key] = tv;
+        lookup[`${fdHome.toLowerCase()}|||${fdAway.toLowerCase()}`] = tv;
       }
     }
     return lookup;
   } catch(e) {
-    console.error('[tv]', e.message);
     return {};
   }
 }
@@ -169,9 +169,7 @@ function defaultTV(leagueKey, dateStr, timeStr) {
 function findTV(home, away, leagueKey, dateStr, timeStr, tvLookup) {
   const h = home.toLowerCase();
   const a = away.toLowerCase();
-  // Exacte match
   if (tvLookup[`${h}|||${a}`]) return tvLookup[`${h}|||${a}`];
-  // Fuzzy: eerste woord
   const hw = h.split(/[\s\-]+/)[0];
   const aw = a.split(/[\s\-]+/)[0];
   for (const [k, v] of Object.entries(tvLookup)) {
@@ -251,9 +249,8 @@ export default async function handler(req, res) {
     );
 
     const tvLookup = await tvPromise;
-
-    const matches = [];
-    const errors  = [];
+    const matches  = [];
+    const errors   = [];
 
     for (const { league, events, status, error } of leagueResults) {
       if (error || (status && status !== 200)) {
@@ -288,7 +285,7 @@ export default async function handler(req, res) {
 
     matches.sort((a, b) => a.sk.localeCompare(b.sk));
 
-    // Alleen cachen als er echt wedstrijden zijn — nooit een lege response cachen
+    // Nooit een lege response cachen — anders zit je 24u vast
     if (matches.length > 0) {
       res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=3600');
     } else {
@@ -305,7 +302,6 @@ export default async function handler(req, res) {
 
   } catch (err) {
     res.setHeader('Cache-Control', 'no-store');
-    console.error('[matches.js] fatal:', err.message);
     return res.status(500).json({ source: 'error', error: err.message, count: 0, matches: [] });
   }
 }
