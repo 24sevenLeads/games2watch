@@ -195,7 +195,7 @@ async function fetchLeague(league, dateFrom, dateTo, apiKey) {
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=3600');
+  res.setHeader('Cache-Control', 'no-store');
 
   const apiKey = process.env.FOOTBALL_DATA_KEY;
   if (!apiKey) {
