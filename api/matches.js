@@ -1,43 +1,49 @@
-// api/matches.js — v5
-// Haalt speelschema's op van TheSportsDB (gratis, geen API key nodig)
-// TV-info wordt bepaald op basis van NL uitzendrechten per competitie
+// api/matches.js — v6
+// Gebruikt football-data.org (gratis, API key vereist)
+// Haalt wedstrijden op voor de komende 14 dagen voor alle competities
+// API key opgeslagen als FOOTBALL_DATA_KEY in Vercel environment variables
 
+const BASE_URL = 'https://api.football-data.org/v4';
+
+// Competities met hun football-data.org codes
 const LEAGUES = [
-  { key: 'pl', id: '4328', name: 'Premier League',  flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
-  { key: 'ed', id: '4337', name: 'Eredivisie',       flag: '🇳🇱' },
-  { key: 'bl', id: '4331', name: 'Bundesliga',       flag: '🇩🇪' },
-  { key: 'll', id: '4335', name: 'La Liga',           flag: '🇪🇸' },
-  { key: 'sa', id: '4332', name: 'Serie A',           flag: '🇮🇹' },
-  { key: 'l1', id: '4334', name: 'Ligue 1',           flag: '🇫🇷' },
+  { key: 'pl',  code: 'PL',  name: 'Premier League', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+  { key: 'ed',  code: 'DED', name: 'Eredivisie',      flag: '🇳🇱' },
+  { key: 'bl',  code: 'BL1', name: 'Bundesliga',      flag: '🇩🇪' },
+  { key: 'll',  code: 'PD',  name: 'La Liga',         flag: '🇪🇸' },
+  { key: 'sa',  code: 'SA',  name: 'Serie A',         flag: '🇮🇹' },
+  { key: 'l1',  code: 'FL1', name: 'Ligue 1',         flag: '🇫🇷' },
+  { key: 'cl',  code: 'CL',  name: 'Champions League',flag: '🏆' },
 ];
 
 // NL TV-rechten per competitie (seizoen 2025/26)
-// Premier League za 13:00-16:00 → Prime Video, rest → Viaplay
 function getTV(leagueKey, dateStr, timeStr) {
   const hour = timeStr ? parseInt(timeStr.split(':')[0]) : 0;
-  const dow   = new Date(dateStr).getDay(); // 0=zo, 6=za
+  const dow  = new Date(dateStr + 'T12:00:00Z').getDay(); // 0=zo, 6=za
 
   if (leagueKey === 'pl') {
+    // Zaterdagmiddag 13:00-16:00 lokale tijd → Prime Video
     if (dow === 6 && hour >= 13 && hour < 16)
       return { label: 'Prime Video', cls: 'prime', free: false };
     return { label: 'Viaplay', cls: 'viaplay', free: false };
   }
-  if (leagueKey === 'bl') return { label: 'Viaplay',     cls: 'viaplay', free: false };
-  if (leagueKey === 'ed') return { label: 'ESPN',        cls: 'espn',    free: false };
-  if (leagueKey === 'll') return { label: 'Ziggo Sport', cls: 'ziggo',   free: false };
-  if (leagueKey === 'sa') return { label: 'Ziggo Sport', cls: 'ziggo',   free: false };
-  if (leagueKey === 'l1') return { label: 'Viaplay',     cls: 'viaplay', free: false };
+  if (leagueKey === 'bl')  return { label: 'Viaplay',     cls: 'viaplay', free: false };
+  if (leagueKey === 'ed')  return { label: 'ESPN',        cls: 'espn',    free: false };
+  if (leagueKey === 'll')  return { label: 'Ziggo Sport', cls: 'ziggo',   free: false };
+  if (leagueKey === 'sa')  return { label: 'Ziggo Sport', cls: 'ziggo',   free: false };
+  if (leagueKey === 'l1')  return { label: 'Viaplay',     cls: 'viaplay', free: false };
+  if (leagueKey === 'cl')  return { label: 'Ziggo Sport', cls: 'ziggo',   free: false };
   return { label: '?', cls: 'other', free: false };
 }
 
 // Standen (april 2026) — voor inzet-badges
 const STANDINGS = {
-  pl: {'Arsenal':1,'Arsenal FC':1,'Manchester City':2,'Man City':2,'Manchester United':3,'Man United':3,'Aston Villa':4,'Liverpool':5,'Liverpool FC':5,'Chelsea':6,'Chelsea FC':6,'Brentford':7,'Brentford FC':7,'Everton':8,'Everton FC':8,'Fulham':9,'Fulham FC':9,'Brighton':10,'Brighton & Hove Albion':10,'Sunderland':11,'Sunderland AFC':11,'Newcastle':12,'Newcastle United':12,'Bournemouth':13,'AFC Bournemouth':13,'Crystal Palace':14,'Leeds United':15,'Leeds':15,'Nottingham Forest':16,'Tottenham':17,'Tottenham Hotspur':17,'West Ham':18,'West Ham United':18,'Burnley':19,'Burnley FC':19,'Wolves':20,'Wolverhampton Wanderers':20},
-  bl: {'Bayern Munich':1,'Bayern München':1,'Borussia Dortmund':2,'VfB Stuttgart':3,'RB Leipzig':4,'TSG Hoffenheim':5,'Hoffenheim':5,'Bayer Leverkusen':6,'Leverkusen':6,'Eintracht Frankfurt':7,'Frankfurt':7,'SC Freiburg':8,'Freiburg':8,'Union Berlin':9,'1. FC Union Berlin':9,'FC Augsburg':10,'Augsburg':10,'FSV Mainz':11,'Mainz':11,'Mainz 05':11,'Hamburger SV':12,'Hamburg':12,'HSV':12,'Borussia Monchengladbach':13,'Monchengladbach':13,'Mönchengladbach':13,'Borussia Mönchengladbach':13,'Werder Bremen':14,'Bremen':14,'1. FC Cologne':15,'FC Köln':15,'Köln':15,'Koln':15,'1. FC Köln':15,'FC St. Pauli':16,'St Pauli':16,'St. Pauli':16,'VFL Wolfsburg':17,'Wolfsburg':17,'VfL Wolfsburg':17,'1. FC Heidenheim':18,'Heidenheim':18},
-  ed: {'PSV':1,'PSV Eindhoven':1,'Feyenoord':2,'NEC':3,'NEC Nijmegen':3,'Ajax':4,'AFC Ajax':4,'FC Twente':5,'Twente':5,'AZ':6,'AZ Alkmaar':6,'FC Utrecht':7,'Utrecht':7,'sc Heerenveen':8,'SC Heerenveen':8,'Heerenveen':8,'Go Ahead Eagles':9,'Heracles Almelo':10,'Heracles':10,'FC Groningen':11,'Groningen':11,'Fortuna Sittard':12,'Fortuna':12,'Sparta Rotterdam':13,'Sparta':13,'NAC Breda':14,'NAC':14,'Excelsior Rotterdam':15,'Excelsior':15,'FC Volendam':16,'Volendam':16,'Telstar':17,'SC Telstar':17,'PEC Zwolle':18,'PEC':18},
-  ll: {'Real Madrid':1,'Real Madrid CF':1,'FC Barcelona':2,'Barcelona':2,'Atletico Madrid':3,'Atlético Madrid':3,'Club Atletico de Madrid':3,'Athletic Bilbao':4,'Athletic Club':4,'Villarreal':5,'Villarreal CF':5,'Real Sociedad':6,'Real Betis':7,'Real Betis Balompie':7,'Celta Vigo':8,'Celta de Vigo':8,'RC Celta':8,'Sevilla':9,'Sevilla FC':9,'Getafe':10,'Getafe CF':10,'Osasuna':11,'CA Osasuna':11,'Valencia':12,'Valencia CF':12,'Rayo Vallecano':13,'Girona':14,'Girona FC':14,'Mallorca':15,'RCD Mallorca':15,'Elche':16,'Elche CF':16,'Alaves':17,'Deportivo Alaves':17,'Deportivo Alavés':17,'Levante':18,'Levante UD':18,'Espanyol':19,'RCD Espanyol':19,'Oviedo':20,'Real Oviedo':20},
-  sa: {'Inter':1,'Inter Milan':1,'Inter Milano':1,'Internazionale':1,'Napoli':2,'SSC Napoli':2,'Juventus':3,'Juventus FC':3,'AC Milan':4,'Milan':4,'Atalanta':5,'Atalanta BC':5,'Lazio':6,'SS Lazio':6,'Lazio Rome':6,'Roma':7,'AS Roma':7,'Fiorentina':8,'ACF Fiorentina':8,'Torino':9,'Torino FC':9,'Bologna':10,'Bologna FC':10,'Udinese':11,'Udinese Calcio':11,'Como':12,'Como 1907':12,'Lecce':13,'US Lecce':13,'Verona':14,'Hellas Verona':14,'Cagliari':15,'Cagliari Calcio':15,'Parma':16,'Parma Calcio':16,'Cremonese':17,'US Cremonese':17,'Pisa':18,'SC Pisa':18,'Genoa':19,'Genoa CFC':19,'Sassuolo':20,'US Sassuolo':20},
-  l1: {'PSG':1,'Paris Saint-Germain':1,'Paris Saint-Germain FC':1,'Monaco':2,'AS Monaco':2,'Marseille':3,'Olympique Marseille':3,'Olympique de Marseille':3,'Lille':4,'Lille OSC':4,'LOSC Lille':4,'Lyon':5,'Olympique Lyon':5,'Olympique Lyonnais':5,'Nice':6,'OGC Nice':6,'Lens':7,'RC Lens':7,'Racing Club De Lens':7,'Rennes':8,'Stade Rennais':8,'Stade Rennais FC':8,'Strasbourg':9,'RC Strasbourg':9,'Brest':10,'Stade Brest':10,'Stade Brestois':10,'Toulouse':11,'Toulouse FC':11,'Paris FC':12,'Le Havre':13,'Le Havre AC':13,'Nantes':14,'FC Nantes':14,'Angers':15,'Angers SCO':15,'Auxerre':16,'AJ Auxerre':16,'Metz':17,'FC Metz':17,'Lorient':18,'FC Lorient':18},
+  pl: {'Arsenal':1,'Arsenal FC':1,'Manchester City':2,'Man City':2,'Manchester United':3,'Man United':3,'Aston Villa':4,'Liverpool':5,'Liverpool FC':5,'Chelsea':6,'Chelsea FC':6,'Brentford':7,'Brentford FC':7,'Everton':8,'Everton FC':8,'Fulham':9,'Fulham FC':9,'Brighton & Hove Albion':10,'Brighton':10,'Sunderland':11,'Sunderland AFC':11,'Newcastle United':12,'Newcastle':12,'AFC Bournemouth':13,'Bournemouth':13,'Crystal Palace':14,'Leeds United':15,'Leeds':15,'Nottingham Forest':16,'Tottenham Hotspur':17,'Tottenham':17,'West Ham United':18,'West Ham':18,'Burnley':19,'Burnley FC':19,'Wolverhampton Wanderers':20,'Wolves':20},
+  bl: {'Bayern Munich':1,'Bayern München':1,'FC Bayern München':1,'Borussia Dortmund':2,'BVB':2,'VfB Stuttgart':3,'Stuttgart':3,'RB Leipzig':4,'Leipzig':4,'TSG Hoffenheim':5,'Hoffenheim':5,'Bayer Leverkusen':6,'Leverkusen':6,'Eintracht Frankfurt':7,'Frankfurt':7,'SC Freiburg':8,'Freiburg':8,'1. FC Union Berlin':9,'Union Berlin':9,'FC Augsburg':10,'Augsburg':10,'1. FSV Mainz 05':11,'Mainz':11,'Hamburger SV':12,'Hamburg':12,'Borussia Mönchengladbach':13,'Mönchengladbach':13,'SV Werder Bremen':14,'Werder Bremen':14,'1. FC Köln':15,'FC Köln':15,'Köln':15,'FC St. Pauli':16,'St. Pauli':16,'St Pauli':16,'VfL Wolfsburg':17,'Wolfsburg':17,'1. FC Heidenheim 1846':18,'Heidenheim':18},
+  ed: {'PSV':1,'PSV Eindhoven':1,'Feyenoord':2,'NEC':3,'NEC Nijmegen':3,'Ajax':4,'AFC Ajax':4,'FC Twente':5,'Twente':5,'AZ':6,'AZ Alkmaar':6,'FC Utrecht':7,'Utrecht':7,'sc Heerenveen':8,'SC Heerenveen':8,'Heerenveen':8,'Go Ahead Eagles':9,'Heracles Almelo':10,'Heracles':10,'FC Groningen':11,'Groningen':11,'Fortuna Sittard':12,'Sparta Rotterdam':13,'NAC Breda':14,'NAC':14,'Excelsior Rotterdam':15,'Excelsior':15,'FC Volendam':16,'Volendam':16,'Telstar':17,'SC Telstar':17,'PEC Zwolle':18},
+  ll: {'Real Madrid CF':1,'Real Madrid':1,'FC Barcelona':2,'Barcelona':2,'Club Atlético de Madrid':3,'Atletico Madrid':3,'Athletic Club':4,'Athletic Bilbao':4,'Villarreal CF':5,'Villarreal':5,'Real Sociedad':6,'Real Betis Balompié':7,'Real Betis':7,'RC Celta de Vigo':8,'Celta Vigo':8,'Sevilla FC':9,'Sevilla':9,'Getafe CF':10,'Getafe':10,'CA Osasuna':11,'Osasuna':11,'Valencia CF':12,'Valencia':12,'Rayo Vallecano':13,'Girona FC':14,'Girona':14,'RCD Mallorca':15,'Mallorca':15,'Elche CF':16,'Elche':16,'Deportivo Alavés':17,'Alaves':17,'Levante UD':18,'Levante':18,'RCD Espanyol':19,'Espanyol':19,'Real Oviedo':20,'Oviedo':20},
+  sa: {'Inter Milan':1,'FC Internazionale Milano':1,'Inter':1,'SSC Napoli':2,'Napoli':2,'Juventus FC':3,'Juventus':3,'AC Milan':4,'Milan':4,'Atalanta BC':5,'Atalanta':5,'SS Lazio':6,'Lazio':6,'AS Roma':7,'Roma':7,'ACF Fiorentina':8,'Fiorentina':8,'Torino FC':9,'Torino':9,'Bologna FC 1909':10,'Bologna':10,'Udinese Calcio':11,'Udinese':11,'Como 1907':12,'Como':12,'US Lecce':13,'Lecce':13,'Hellas Verona FC':14,'Verona':14,'Cagliari Calcio':15,'Cagliari':15,'Parma Calcio 1913':16,'Parma':16,'US Cremonese':17,'Cremonese':17,'Pisa SC':18,'Pisa':18,'Genoa CFC':19,'Genoa':19,'US Sassuolo Calcio':20,'Sassuolo':20},
+  l1: {'Paris Saint-Germain FC':1,'PSG':1,'Paris Saint-Germain':1,'AS Monaco FC':2,'Monaco':2,'Olympique de Marseille':3,'Marseille':3,'LOSC Lille':4,'Lille':4,'Olympique Lyonnais':5,'Lyon':5,'OGC Nice':6,'Nice':6,'RC Lens':7,'Lens':7,'Stade Rennais FC 1901':8,'Rennes':8,'RC Strasbourg Alsace':9,'Strasbourg':9,'Stade Brestois 29':10,'Brest':10,'Toulouse FC':11,'Toulouse':11,'Paris FC':12,'Le Havre AC':13,'Le Havre':13,'FC Nantes':14,'Nantes':14,'Angers SCO':15,'Angers':15,'AJ Auxerre':16,'Auxerre':16,'FC Metz':17,'Metz':17,'FC Lorient':18,'Lorient':18},
 };
 
 const STAKE_ZONES = {
@@ -47,11 +53,12 @@ const STAKE_ZONES = {
   sa:[{max:1,key:'champ'},{max:4,key:'cl-direct'},{max:6,key:'el-direct'},{max:7,key:'conf'},{rPO:18,rDir:19,total:20}],
   l1:[{max:1,key:'champ'},{max:3,key:'cl-direct'},{max:4,key:'cl-pre'},{max:6,key:'el-direct'},{rPO:16,rDir:17,total:18}],
   ed:[{max:1,key:'champ'},{max:3,key:'cl-pre'},{max:5,key:'el-pre'},{max:7,key:'conf'},{rPO:16,rDir:17,total:18}],
+  cl:[],
 };
 
 function clubStake(leagueKey, rank) {
   const zones = STAKE_ZONES[leagueKey];
-  if (!zones || !rank) return 'mid';
+  if (!zones || !zones.length || !rank) return 'mid';
   const last = zones[zones.length - 1];
   if (rank >= (last.rDir || last.total - 1)) return 'rel-dir';
   if (rank >= (last.rPO  || last.total - 2)) return 'rel-po';
@@ -59,95 +66,118 @@ function clubStake(leagueKey, rank) {
   return 'mid';
 }
 
-// Dag-label in Nederlandse stijl
+// Datum helpers
+function toDateStr(date) {
+  return date.toISOString().split('T')[0];
+}
+
 function dutchDayLabel(dateStr) {
   const d = new Date(dateStr + 'T12:00:00Z');
-  const days = ['Zo','Ma','Di','Wo','Do','Vr','Za'];
+  const days   = ['Zo','Ma','Di','Wo','Do','Vr','Za'];
   const months = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
   return `${days[d.getUTCDay()]} ${d.getUTCDate()} ${months[d.getUTCMonth()]}`;
 }
 
-// Sorteersleutel: "2026-04-13 21:00"
-function sortKey(dateStr, timeStr) {
-  return `${dateStr} ${timeStr || '00:00'}`;
-}
-
-async function fetchLeague(league) {
-  const url = `https://www.thesportsdb.com/api/v1/json/123/eventsnextleague.php?id=${league.id}`;
-  const res  = await fetch(url, {
-    headers: { 'User-Agent': 'Games2Watch/1.0 (+https://games2watch.eu)' }
+// Haal wedstrijden op voor één competitie
+async function fetchLeague(league, dateFrom, dateTo, apiKey) {
+  const url = `${BASE_URL}/competitions/${league.code}/matches?dateFrom=${dateFrom}&dateTo=${dateTo}&status=SCHEDULED`;
+  const res = await fetch(url, {
+    headers: {
+      'X-Auth-Token': apiKey,
+      'User-Agent': 'Games2Watch/1.0 (+https://games2watch.eu)',
+    },
   });
-  if (!res.ok) throw new Error(`TheSportsDB ${league.id}: ${res.status}`);
+
+  if (res.status === 429) throw new Error('Rate limit bereikt');
+  if (!res.ok) throw new Error(`football-data.org ${league.code}: HTTP ${res.status}`);
+
   const data = await res.json();
-  return (data.events || []);
+  return data.matches || [];
 }
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=1800');
 
-  try {
-    // Haal alle competities parallel op
-    const results = await Promise.allSettled(
-      LEAGUES.map(l => fetchLeague(l))
-    );
-
-    const matches = [];
-    const today   = new Date().toISOString().split('T')[0];
-
-    LEAGUES.forEach((league, i) => {
-      const result = results[i];
-      if (result.status !== 'fulfilled') {
-        console.error(`[${league.key}] failed:`, result.reason?.message);
-        return;
-      }
-
-      const events = result.value;
-      const stand  = STANDINGS[league.key] || {};
-
-      events.forEach(ev => {
-        const dateStr = ev.dateEvent;
-        const timeStr = (ev.strTime || '00:00').substring(0, 5);
-
-        // Sla al gespeelde wedstrijden over
-        if (dateStr < today) return;
-        // Sla wedstrijden zonder datum over
-        if (!dateStr) return;
-
-        const home   = ev.strHomeTeam;
-        const away   = ev.strAwayTeam;
-        const rH     = stand[home] || null;
-        const rA     = stand[away] || null;
-
-        // Tijdstip is in UTC — omzetten naar CEST (UTC+2 in zomer)
-        const kickoffUTC  = new Date(`${dateStr}T${timeStr}:00Z`);
-        const kickoffCEST = new Date(kickoffUTC.getTime() + 2 * 3600 * 1000);
-        const localTime   = kickoffCEST.toTimeString().substring(0, 5);
-        const localDate   = kickoffCEST.toISOString().split('T')[0];
-
-        matches.push({
-          sk:       sortKey(localDate, localTime),
-          day:      dutchDayLabel(localDate),
-          time:     localTime,
-          date:     localDate,
-          comp:     league.name,
-          leagueKey: league.key,
-          flag:     league.flag,
-          home, away,
-          rH, rA,
-          stakeH:   league.key && rH ? clubStake(league.key, rH) : 'mid',
-          stakeA:   league.key && rA ? clubStake(league.key, rA) : 'mid',
-          tv:       getTV(league.key, localDate, localTime),
-        });
-      });
+  const apiKey = process.env.FOOTBALL_DATA_KEY;
+  if (!apiKey) {
+    return res.status(500).json({
+      source: 'error',
+      error:  'FOOTBALL_DATA_KEY niet ingesteld in Vercel environment variables',
+      count:  0,
+      matches: [],
     });
+  }
+
+  // Datumrange: vandaag t/m 14 dagen vooruit
+  const today  = new Date();
+  const future = new Date();
+  future.setDate(today.getDate() + 14);
+  const dateFrom = toDateStr(today);
+  const dateTo   = toDateStr(future);
+
+  try {
+    // Haal alle competities sequentieel op (rate limit: 10 calls/minuut)
+    const matches = [];
+
+    for (const league of LEAGUES) {
+      try {
+        const events = await fetchLeague(league, dateFrom, dateTo, apiKey);
+        const stand  = STANDINGS[league.key] || {};
+
+        for (const ev of events) {
+          // football-data.org geeft UTC tijdstip
+          const utcDate = new Date(ev.utcDate);
+
+          // Omzetten naar CEST (UTC+2 zomer, UTC+1 winter)
+          // Simpele benadering: detecteer zomertijd op basis van datum
+          const month = utcDate.getUTCMonth() + 1;
+          const offset = (month >= 4 && month <= 10) ? 2 : 1; // CEST of CET
+          const local  = new Date(utcDate.getTime() + offset * 3600 * 1000);
+
+          const dateStr = local.toISOString().split('T')[0];
+          const timeStr = local.toTimeString().substring(0, 5);
+          const home    = ev.homeTeam?.name || '';
+          const away    = ev.awayTeam?.name || '';
+
+          if (!home || !away) continue;
+
+          const rH = stand[home] || null;
+          const rA = stand[away] || null;
+
+          matches.push({
+            sk:        `${dateStr} ${timeStr}`,
+            day:       dutchDayLabel(dateStr),
+            time:      timeStr,
+            date:      dateStr,
+            comp:      league.name,
+            leagueKey: league.key,
+            flag:      league.flag,
+            home, away,
+            rH, rA,
+            stakeH:    rH ? clubStake(league.key, rH) : 'mid',
+            stakeA:    rA ? clubStake(league.key, rA) : 'mid',
+            tv:        getTV(league.key, dateStr, timeStr),
+          });
+        }
+
+        // Kleine pauze tussen calls om rate limit te respecteren
+        await new Promise(r => setTimeout(r, 200));
+
+      } catch (leagueErr) {
+        console.error(`[${league.key}] error:`, leagueErr.message);
+        // Doorgaan met de rest van de competities
+      }
+    }
 
     // Chronologisch sorteren
     matches.sort((a, b) => a.sk.localeCompare(b.sk));
 
     res.status(200).json({
-      source:     'thesportsdb.com',
+      source:     'football-data.org',
       fetched_at: new Date().toISOString(),
+      date_from:  dateFrom,
+      date_to:    dateTo,
       count:      matches.length,
       matches,
     });
