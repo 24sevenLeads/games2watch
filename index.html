@@ -358,13 +358,17 @@ function render(){
 // ── LOAD DATA VAN API ──
 async function loadMatches() {
   try {
-    const res  = await fetch('/api/matches');
-    if (!res.ok) throw new Error(`API ${res.status}`);
+    // no-store zodat Vercel CDN cache omzeild wordt
+    const res  = await fetch('/api/matches', { cache: 'no-store' });
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '');
+      throw new Error(`API ${res.status}: ${errText.substring(0,100)}`);
+    }
 
     const data = await res.json();
 
     if (!data.matches || data.matches.length === 0) {
-      throw new Error('Geen wedstrijden ontvangen van de bron');
+      throw new Error(`Geen wedstrijden (bron: ${data.source||'?'}, fout: ${data.error||'onbekend'})`);
     }
 
     MATCHES = data.matches;
@@ -383,7 +387,7 @@ async function loadMatches() {
     document.getElementById('main-content').innerHTML = `
       <div class="error-msg">
         <strong>Speelschema tijdelijk niet beschikbaar</strong>
-        We hebben een probleem met het ophalen van de wedstrijden. Probeer het over enkele minuten opnieuw.
+        ${err.message}<br>Probeer het over enkele minuten opnieuw.
       </div>`;
     document.getElementById('fetch-status').textContent = 'Data tijdelijk niet beschikbaar';
     document.getElementById('stats-bar').innerHTML =
