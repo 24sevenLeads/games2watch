@@ -27,9 +27,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-
 
 .filters{display:flex;overflow-x:auto;scrollbar-width:none;padding:2px 0}
 .filters::-webkit-scrollbar{display:none}
-.filter-btn{font-size:12px;font-weight:500;background:none;border:none;color:var(--muted2);padding:10px 12px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .15s;flex-shrink:0}
+.filter-btn{font-size:13px;font-weight:600;background:none;border:none;color:var(--muted2);padding:10px 14px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .15s;flex-shrink:0}
 .filter-btn:hover{color:var(--text)}
 .filter-btn.active{color:var(--text);border-bottom-color:var(--champ)}
+.sub-filters{background:var(--bg2);border-bottom:1px solid var(--border);padding:4px 16px;display:flex;gap:4px;flex-wrap:wrap;align-items:center;min-height:36px}
+.sub-btn{font-size:11px;font-weight:500;padding:4px 10px;border-radius:4px;border:1px solid transparent;background:none;color:var(--muted2);cursor:pointer;transition:all .15s;white-space:nowrap}
+.sub-btn:hover{color:var(--text);background:var(--bg3)}
+.sub-btn.active{color:var(--text);background:var(--bg3);border-color:var(--muted)}
 
 .sec-filters{background:var(--bg2);border-bottom:1px solid var(--border);padding:8px 16px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .sec-label{font-size:10px;color:var(--muted);margin-right:2px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;white-space:nowrap}
@@ -119,18 +123,17 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:20px 16p
     <a class="logo" href="/nl">games2watch<span>.</span>eu <small>/nl</small></a>
     <div class="header-meta" id="cur-date"></div>
   </div>
-  <nav class="filters" id="league-filters">
-    <button class="filter-btn active" onclick="filterLeague('all',this)">Alle competities</button>
-    <button class="filter-btn" onclick="filterLeague('pl',this)">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</button>
-    <button class="filter-btn" onclick="filterLeague('ed',this)">🇳🇱 Eredivisie</button>
-    <button class="filter-btn" onclick="filterLeague('bl',this)">🇩🇪 Bundesliga</button>
-    <button class="filter-btn" onclick="filterLeague('ll',this)">🇪🇸 La Liga</button>
-    <button class="filter-btn" onclick="filterLeague('sa',this)">🇮🇹 Serie A</button>
-    <button class="filter-btn" onclick="filterLeague('l1',this)">🇫🇷 Ligue 1</button>
-    <button class="filter-btn" onclick="filterLeague('cl',this)">🏆 CL</button>
-    <button class="filter-btn" onclick="filterLeague('el',this)">🏆 EL</button>
-    <button class="filter-btn" onclick="filterLeague('conf',this)">🏆 Conference</button>
+  <nav class="filters" id="country-filters">
+    <button class="filter-btn active" onclick="filterCountry('all',this)">Alle</button>
+    <button class="filter-btn" onclick="filterCountry('en',this)">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Engeland</button>
+    <button class="filter-btn" onclick="filterCountry('nl',this)">🇳🇱 Nederland</button>
+    <button class="filter-btn" onclick="filterCountry('de',this)">🇩🇪 Duitsland</button>
+    <button class="filter-btn" onclick="filterCountry('es',this)">🇪🇸 Spanje</button>
+    <button class="filter-btn" onclick="filterCountry('it',this)">🇮🇹 Italië</button>
+    <button class="filter-btn" onclick="filterCountry('fr',this)">🇫🇷 Frankrijk</button>
+    <button class="filter-btn" onclick="filterCountry('eu',this)">🏆 Europa</button>
   </nav>
+  <div class="sub-filters" id="sub-filters"></div>
 </header>
 
 <div class="sec-filters">
@@ -173,14 +176,47 @@ const BADGE_LABELS = {
   'rel-dir':'Degradatie','rel-po':'Play-off',mid:'',
 };
 
-let MATCHES = [];
-let activeLeague = 'all';
+let MATCHES = [{"sk": "2026-04-14 21:00", "day": "Di 14 apr", "time": "21:00", "date": "2026-04-14", "comp": "Champions League", "leagueKey": "cl", "flag": "🏆", "home": "Atlético Madrid", "away": "FC Barcelona", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 2", "cls": "ziggo", "free": false}, "legScore": "0-2"}, {"sk": "2026-04-14 21:00", "day": "Di 14 apr", "time": "21:00", "date": "2026-04-14", "comp": "Champions League", "leagueKey": "cl", "flag": "🏆", "home": "Liverpool", "away": "Paris Saint-Germain F.C.", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport", "cls": "ziggo", "free": false}, "legScore": "2-0"}, {"sk": "2026-04-14 21:00", "day": "Di 14 apr", "time": "21:00", "date": "2026-04-14", "comp": "Championship", "leagueKey": "champ", "flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "home": "Portsmouth", "away": "Ipswich Town", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}, {"sk": "2026-04-14 21:00", "day": "Di 14 apr", "time": "21:00", "date": "2026-04-14", "comp": "Championship", "leagueKey": "champ", "flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "home": "Southampton", "away": "Blackburn Rovers", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}, {"sk": "2026-04-15 21:00", "day": "Wo 15 apr", "time": "21:00", "date": "2026-04-15", "comp": "Champions League", "leagueKey": "cl", "flag": "🏆", "home": "Arsenal", "away": "Sporting Clube de Portugal", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 2", "cls": "ziggo", "free": false}, "legScore": "0-1"}, {"sk": "2026-04-15 21:00", "day": "Wo 15 apr", "time": "21:00", "date": "2026-04-15", "comp": "Champions League", "leagueKey": "cl", "flag": "🏆", "home": "Bayern München", "away": "Real Madrid C.F.", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport", "cls": "ziggo", "free": false}, "legScore": "1-2"}, {"sk": "2026-04-16 18:45", "day": "Do 16 apr", "time": "18:45", "date": "2026-04-16", "comp": "Europa League", "leagueKey": "el", "flag": "🏆", "home": "Celta de Vigo", "away": "SC Freiburg", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 3", "cls": "ziggo", "free": false}, "legScore": "3-0"}, {"sk": "2026-04-16 18:45", "day": "Do 16 apr", "time": "18:45", "date": "2026-04-16", "comp": "Conference League", "leagueKey": "conf", "flag": "🏆", "home": "AZ", "away": "FC Shakhtar Donetsk", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport", "cls": "ziggo", "free": false}, "legScore": "3-0"}, {"sk": "2026-04-16 21:00", "day": "Do 16 apr", "time": "21:00", "date": "2026-04-16", "comp": "Europa League", "leagueKey": "el", "flag": "🏆", "home": "Real Betis", "away": "S.C. Braga", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 5", "cls": "ziggo", "free": false}, "legScore": "1-1"}, {"sk": "2026-04-16 21:00", "day": "Do 16 apr", "time": "21:00", "date": "2026-04-16", "comp": "Europa League", "leagueKey": "el", "flag": "🏆", "home": "Nottingham Forest", "away": "F.C. Porto", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 3", "cls": "ziggo", "free": false}, "legScore": "1-1"}, {"sk": "2026-04-16 21:00", "day": "Do 16 apr", "time": "21:00", "date": "2026-04-16", "comp": "Europa League", "leagueKey": "el", "flag": "🏆", "home": "Aston Villa", "away": "Bologna F.C. 1909", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 6", "cls": "ziggo", "free": false}, "legScore": "1-3"}, {"sk": "2026-04-16 21:00", "day": "Do 16 apr", "time": "21:00", "date": "2026-04-16", "comp": "Conference League", "leagueKey": "conf", "flag": "🏆", "home": "Fiorentina", "away": "Crystal Palace", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 2", "cls": "ziggo", "free": false}, "legScore": "3-0"}, {"sk": "2026-04-18 13:00", "day": "Za 18 apr", "time": "13:00", "date": "2026-04-18", "comp": "2. Bundesliga", "leagueKey": "bl2", "flag": "🇩🇪", "home": "Eintracht Braunschweig", "away": "DSC Arminia Bielefeld", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}, {"sk": "2026-04-18 13:00", "day": "Za 18 apr", "time": "13:00", "date": "2026-04-18", "comp": "2. Bundesliga", "leagueKey": "bl2", "flag": "🇩🇪", "home": "FC Magdeburg", "away": "SV Elversberg", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}, {"sk": "2026-04-18 13:00", "day": "Za 18 apr", "time": "13:00", "date": "2026-04-18", "comp": "2. Bundesliga", "leagueKey": "bl2", "flag": "🇩🇪", "home": "Hannover 96", "away": "SG Dynamo Dresden", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}, {"sk": "2026-04-18 13:00", "day": "Za 18 apr", "time": "13:00", "date": "2026-04-18", "comp": "2. Bundesliga", "leagueKey": "bl2", "flag": "🇩🇪", "home": "Holstein Kiel", "away": "SC Preußen Münster", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}, {"sk": "2026-04-18 13:00", "day": "Za 18 apr", "time": "13:00", "date": "2026-04-18", "comp": "2. Bundesliga", "leagueKey": "bl2", "flag": "🇩🇪", "home": "SC Paderborn 07", "away": "VfL Bochum", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}, {"sk": "2026-04-18 13:00", "day": "Za 18 apr", "time": "13:00", "date": "2026-04-18", "comp": "2. Bundesliga", "leagueKey": "bl2", "flag": "🇩🇪", "home": "SpVgg Greuther Fürth", "away": "Karlsruher SC", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}, {"sk": "2026-04-18 13:00", "day": "Za 18 apr", "time": "13:00", "date": "2026-04-18", "comp": "2. Bundesliga", "leagueKey": "bl2", "flag": "🇩🇪", "home": "SV Darmstadt 98", "away": "1. FC Kaiserslautern", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}, {"sk": "2026-04-18 20:30", "day": "Za 18 apr", "time": "20:30", "date": "2026-04-18", "comp": "2. Bundesliga", "leagueKey": "bl2", "flag": "🇩🇪", "home": "Hertha BSC", "away": "FC Schalke 04", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}, {"sk": "2026-04-18 20:30", "day": "Za 18 apr", "time": "20:30", "date": "2026-04-18", "comp": "2. Bundesliga", "leagueKey": "bl2", "flag": "🇩🇪", "home": "SV Elversberg", "away": "1. FC Nürnberg", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}];
+let activeLeague = null;
+let activeCountry = null;
 let activeLegend = null;
 let activeTV     = null;
 
-function filterLeague(v,btn){
-  activeLeague=v;
-  document.querySelectorAll('#league-filters .filter-btn').forEach(b=>b.classList.remove('active'));
+// Land → competities mapping
+const COUNTRY_LEAGUES = {
+  en:  [{key:'pl',label:'Premier League'},{key:'champ',label:'Championship'}],
+  nl:  [{key:'ed',label:'Eredivisie'},{key:'kkd',label:'Keuken Kampioen'}],
+  de:  [{key:'bl',label:'Bundesliga'},{key:'bl2',label:'2. Bundesliga'}],
+  es:  [{key:'ll',label:'La Liga'}],
+  it:  [{key:'sa',label:'Serie A'}],
+  fr:  [{key:'l1',label:'Ligue 1'}],
+  eu:  [{key:'cl',label:'Champions League'},{key:'el',label:'Europa League'},{key:'conf',label:'Conference League'}],
+};
+
+let activeCountry = null;
+
+function filterCountry(country, btn) {
+  activeCountry = country === 'all' ? null : country;
+  activeLeague = null;
+  document.querySelectorAll('#country-filters .filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const sub = document.getElementById('sub-filters');
+  sub.innerHTML = '';
+  if (activeCountry && COUNTRY_LEAGUES[activeCountry]) {
+    COUNTRY_LEAGUES[activeCountry].forEach(comp => {
+      const b = document.createElement('button');
+      b.className = 'sub-btn';
+      b.textContent = comp.label;
+      b.onclick = () => filterLeague(comp.key, b);
+      sub.appendChild(b);
+    });
+  }
+  render();
+}
+
+function filterLeague(v, btn) {
+  activeLeague = v;
+  document.querySelectorAll('#sub-filters .sub-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   render();
 }
@@ -211,7 +247,11 @@ function matchPassesTV(m){
 
 function getFiltered(){
   return MATCHES.filter(m=>{
-    if(activeLeague!=='all' && m.leagueKey!==activeLeague) return false;
+    if(activeLeague && m.leagueKey!==activeLeague) return false;
+    if(!activeLeague && activeCountry) {
+      const keys = (COUNTRY_LEAGUES[activeCountry]||[]).map(c=>c.key);
+      if(!keys.includes(m.leagueKey)) return false;
+    }
     if(activeLegend && m.stakeH!==activeLegend && m.stakeA!==activeLegend) return false;
     if(!matchPassesTV(m)) return false;
     return true;
@@ -305,10 +345,10 @@ function render(){
 async function loadMatches(){
   // NOODVERSIE 14 apr — football-data.org rate limit
   // Morgen terugzetten naar API versie
-  MATCHES = [{"sk": "2026-04-14 21:00", "day": "Di 14 apr", "time": "21:00", "date": "2026-04-14", "comp": "Champions League", "leagueKey": "cl", "flag": "🏆", "home": "Atlético Madrid", "away": "FC Barcelona", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 2", "cls": "ziggo", "free": false}, "legScore": "0-2"}, {"sk": "2026-04-14 21:00", "day": "Di 14 apr", "time": "21:00", "date": "2026-04-14", "comp": "Champions League", "leagueKey": "cl", "flag": "🏆", "home": "Liverpool", "away": "Paris Saint-Germain F.C.", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport", "cls": "ziggo", "free": false}, "legScore": "2-0"}, {"sk": "2026-04-15 21:00", "day": "Wo 15 apr", "time": "21:00", "date": "2026-04-15", "comp": "Champions League", "leagueKey": "cl", "flag": "🏆", "home": "Arsenal", "away": "Sporting Clube de Portugal", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 2", "cls": "ziggo", "free": false}, "legScore": "0-1"}, {"sk": "2026-04-15 21:00", "day": "Wo 15 apr", "time": "21:00", "date": "2026-04-15", "comp": "Champions League", "leagueKey": "cl", "flag": "🏆", "home": "Bayern München", "away": "Real Madrid C.F.", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport", "cls": "ziggo", "free": false}, "legScore": "1-2"}, {"sk": "2026-04-16 18:45", "day": "Do 16 apr", "time": "18:45", "date": "2026-04-16", "comp": "Europa League", "leagueKey": "el", "flag": "🏆", "home": "Celta de Vigo", "away": "SC Freiburg", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 3", "cls": "ziggo", "free": false}, "legScore": "3-0"}, {"sk": "2026-04-16 18:45", "day": "Do 16 apr", "time": "18:45", "date": "2026-04-16", "comp": "Conference League", "leagueKey": "conf", "flag": "🏆", "home": "AZ", "away": "FC Shakhtar Donetsk", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport", "cls": "ziggo", "free": false}, "legScore": "3-0"}, {"sk": "2026-04-16 21:00", "day": "Do 16 apr", "time": "21:00", "date": "2026-04-16", "comp": "Europa League", "leagueKey": "el", "flag": "🏆", "home": "Real Betis", "away": "S.C. Braga", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 5", "cls": "ziggo", "free": false}, "legScore": "1-1"}, {"sk": "2026-04-16 21:00", "day": "Do 16 apr", "time": "21:00", "date": "2026-04-16", "comp": "Europa League", "leagueKey": "el", "flag": "🏆", "home": "Nottingham Forest", "away": "F.C. Porto", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 3", "cls": "ziggo", "free": false}, "legScore": "1-1"}, {"sk": "2026-04-16 21:00", "day": "Do 16 apr", "time": "21:00", "date": "2026-04-16", "comp": "Europa League", "leagueKey": "el", "flag": "🏆", "home": "Aston Villa", "away": "Bologna F.C. 1909", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 6", "cls": "ziggo", "free": false}, "legScore": "1-3"}, {"sk": "2026-04-16 21:00", "day": "Do 16 apr", "time": "21:00", "date": "2026-04-16", "comp": "Conference League", "leagueKey": "conf", "flag": "🏆", "home": "Fiorentina", "away": "Crystal Palace", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 2", "cls": "ziggo", "free": false}, "legScore": "3-0"}];
+  MATCHES = [{"sk": "2026-04-14 21:00", "day": "Di 14 apr", "time": "21:00", "date": "2026-04-14", "comp": "Champions League", "leagueKey": "cl", "flag": "🏆", "home": "Atlético Madrid", "away": "FC Barcelona", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 2", "cls": "ziggo", "free": false}, "legScore": "0-2"}, {"sk": "2026-04-14 21:00", "day": "Di 14 apr", "time": "21:00", "date": "2026-04-14", "comp": "Champions League", "leagueKey": "cl", "flag": "🏆", "home": "Liverpool", "away": "Paris Saint-Germain F.C.", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport", "cls": "ziggo", "free": false}, "legScore": "2-0"}, {"sk": "2026-04-14 21:00", "day": "Di 14 apr", "time": "21:00", "date": "2026-04-14", "comp": "Championship", "leagueKey": "champ", "flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "home": "Portsmouth", "away": "Ipswich Town", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}, {"sk": "2026-04-14 21:00", "day": "Di 14 apr", "time": "21:00", "date": "2026-04-14", "comp": "Championship", "leagueKey": "champ", "flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "home": "Southampton", "away": "Blackburn Rovers", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}, {"sk": "2026-04-15 21:00", "day": "Wo 15 apr", "time": "21:00", "date": "2026-04-15", "comp": "Champions League", "leagueKey": "cl", "flag": "🏆", "home": "Arsenal", "away": "Sporting Clube de Portugal", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 2", "cls": "ziggo", "free": false}, "legScore": "0-1"}, {"sk": "2026-04-15 21:00", "day": "Wo 15 apr", "time": "21:00", "date": "2026-04-15", "comp": "Champions League", "leagueKey": "cl", "flag": "🏆", "home": "Bayern München", "away": "Real Madrid C.F.", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport", "cls": "ziggo", "free": false}, "legScore": "1-2"}, {"sk": "2026-04-16 18:45", "day": "Do 16 apr", "time": "18:45", "date": "2026-04-16", "comp": "Europa League", "leagueKey": "el", "flag": "🏆", "home": "Celta de Vigo", "away": "SC Freiburg", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 3", "cls": "ziggo", "free": false}, "legScore": "3-0"}, {"sk": "2026-04-16 18:45", "day": "Do 16 apr", "time": "18:45", "date": "2026-04-16", "comp": "Conference League", "leagueKey": "conf", "flag": "🏆", "home": "AZ", "away": "FC Shakhtar Donetsk", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport", "cls": "ziggo", "free": false}, "legScore": "3-0"}, {"sk": "2026-04-16 21:00", "day": "Do 16 apr", "time": "21:00", "date": "2026-04-16", "comp": "Europa League", "leagueKey": "el", "flag": "🏆", "home": "Real Betis", "away": "S.C. Braga", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 5", "cls": "ziggo", "free": false}, "legScore": "1-1"}, {"sk": "2026-04-16 21:00", "day": "Do 16 apr", "time": "21:00", "date": "2026-04-16", "comp": "Europa League", "leagueKey": "el", "flag": "🏆", "home": "Nottingham Forest", "away": "F.C. Porto", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 3", "cls": "ziggo", "free": false}, "legScore": "1-1"}, {"sk": "2026-04-16 21:00", "day": "Do 16 apr", "time": "21:00", "date": "2026-04-16", "comp": "Europa League", "leagueKey": "el", "flag": "🏆", "home": "Aston Villa", "away": "Bologna F.C. 1909", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 6", "cls": "ziggo", "free": false}, "legScore": "1-3"}, {"sk": "2026-04-16 21:00", "day": "Do 16 apr", "time": "21:00", "date": "2026-04-16", "comp": "Conference League", "leagueKey": "conf", "flag": "🏆", "home": "Fiorentina", "away": "Crystal Palace", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 2", "cls": "ziggo", "free": false}, "legScore": "3-0"}, {"sk": "2026-04-18 13:00", "day": "Za 18 apr", "time": "13:00", "date": "2026-04-18", "comp": "2. Bundesliga", "leagueKey": "bl2", "flag": "🇩🇪", "home": "Eintracht Braunschweig", "away": "DSC Arminia Bielefeld", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}, {"sk": "2026-04-18 13:00", "day": "Za 18 apr", "time": "13:00", "date": "2026-04-18", "comp": "2. Bundesliga", "leagueKey": "bl2", "flag": "🇩🇪", "home": "FC Magdeburg", "away": "SV Elversberg", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}, {"sk": "2026-04-18 13:00", "day": "Za 18 apr", "time": "13:00", "date": "2026-04-18", "comp": "2. Bundesliga", "leagueKey": "bl2", "flag": "🇩🇪", "home": "Hannover 96", "away": "SG Dynamo Dresden", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}, {"sk": "2026-04-18 13:00", "day": "Za 18 apr", "time": "13:00", "date": "2026-04-18", "comp": "2. Bundesliga", "leagueKey": "bl2", "flag": "🇩🇪", "home": "Holstein Kiel", "away": "SC Preußen Münster", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}, {"sk": "2026-04-18 13:00", "day": "Za 18 apr", "time": "13:00", "date": "2026-04-18", "comp": "2. Bundesliga", "leagueKey": "bl2", "flag": "🇩🇪", "home": "SC Paderborn 07", "away": "VfL Bochum", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}, {"sk": "2026-04-18 13:00", "day": "Za 18 apr", "time": "13:00", "date": "2026-04-18", "comp": "2. Bundesliga", "leagueKey": "bl2", "flag": "🇩🇪", "home": "SpVgg Greuther Fürth", "away": "Karlsruher SC", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}, {"sk": "2026-04-18 13:00", "day": "Za 18 apr", "time": "13:00", "date": "2026-04-18", "comp": "2. Bundesliga", "leagueKey": "bl2", "flag": "🇩🇪", "home": "SV Darmstadt 98", "away": "1. FC Kaiserslautern", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}, {"sk": "2026-04-18 20:30", "day": "Za 18 apr", "time": "20:30", "date": "2026-04-18", "comp": "2. Bundesliga", "leagueKey": "bl2", "flag": "🇩🇪", "home": "Hertha BSC", "away": "FC Schalke 04", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}, {"sk": "2026-04-18 20:30", "day": "Za 18 apr", "time": "20:30", "date": "2026-04-18", "comp": "2. Bundesliga", "leagueKey": "bl2", "flag": "🇩🇪", "home": "SV Elversberg", "away": "1. FC Nürnberg", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}];
   const _now = new Date();
   const _tt = _now.toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'});
-  document.getElementById('fetch-status').textContent=`Speelschema bijgewerkt: ${_tt}`;
+  document.getElementById('fetch-status').textContent='Speelschema bijgewerkt: 13:31';
   render();
 }
 
