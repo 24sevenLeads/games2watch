@@ -359,7 +359,7 @@ function render(){
             <span class="team-name">${m.home}${m.legScore?` <span class="leg-score">(${m.legScore.split('-')[0]})</span>`:''}</span>
             ${badgeHtml(m.stakeH, m.leagueKey)}
           </div>
-          <div class="vs-row">${m.legScore?'heen':'vs'}</div>
+          <div class="vs-row">${m.legScore?'':'vs'}</div>
           <div class="team-line">
             <span class="team-rank">${rankA}</span>
             <span class="team-name">${m.away}${m.legScore?` <span class="leg-score">(${m.legScore.split('-')[1]})</span>`:''}</span>
