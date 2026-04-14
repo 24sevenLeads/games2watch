@@ -303,12 +303,28 @@ function render(){
 }
 
 async function loadMatches(){
-  // NOODVERSIE: statische data van 13 april 2026
-  // Morgen terugzetten naar API versie
-  MATCHES = [{"sk": "2026-04-13 20:00", "day": "Ma 13 apr", "time": "20:00", "date": "2026-04-13", "comp": "Keuken Kampioen", "leagueKey": "kkd", "flag": "🇳🇱", "home": "Jong AZ", "away": "Jong PSV", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "ESPN 3", "cls": "espn", "free": false}}, {"sk": "2026-04-13 20:00", "day": "Ma 13 apr", "time": "20:00", "date": "2026-04-13", "comp": "Keuken Kampioen", "leagueKey": "kkd", "flag": "🇳🇱", "home": "Jong Utrecht", "away": "Vitesse", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "ESPN", "cls": "espn", "free": true}}, {"sk": "2026-04-13 20:00", "day": "Ma 13 apr", "time": "20:00", "date": "2026-04-13", "comp": "Keuken Kampioen", "leagueKey": "kkd", "flag": "🇳🇱", "home": "Jong Ajax", "away": "TOP Oss", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "ESPN 2", "cls": "espn", "free": false}}, {"sk": "2026-04-13 21:00", "day": "Ma 13 apr", "time": "21:00", "date": "2026-04-13", "comp": "Premier League", "leagueKey": "pl", "flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "home": "Manchester United", "away": "Leeds United", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Viaplay TV", "cls": "viaplay", "free": true}}, {"sk": "2026-04-13 21:00", "day": "Ma 13 apr", "time": "21:00", "date": "2026-04-13", "comp": "La Liga", "leagueKey": "ll", "flag": "🇪🇸", "home": "Levante UD", "away": "Getafe CF", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport", "cls": "ziggo", "free": false}}, {"sk": "2026-04-14 21:00", "day": "Di 14 apr", "time": "21:00", "date": "2026-04-14", "comp": "Champions League", "leagueKey": "cl", "flag": "🏆", "home": "Atlético Madrid", "away": "FC Barcelona", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 2", "cls": "ziggo", "free": false}}, {"sk": "2026-04-14 21:00", "day": "Di 14 apr", "time": "21:00", "date": "2026-04-14", "comp": "Champions League", "leagueKey": "cl", "flag": "🏆", "home": "Liverpool", "away": "Paris Saint-Germain F.C.", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport", "cls": "ziggo", "free": false}}, {"sk": "2026-04-15 21:00", "day": "Wo 15 apr", "time": "21:00", "date": "2026-04-15", "comp": "Champions League", "leagueKey": "cl", "flag": "🏆", "home": "Bayern München", "away": "Real Madrid C.F.", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport", "cls": "ziggo", "free": false}}, {"sk": "2026-04-15 21:00", "day": "Wo 15 apr", "time": "21:00", "date": "2026-04-15", "comp": "Champions League", "leagueKey": "cl", "flag": "🏆", "home": "Arsenal", "away": "Sporting Clube de Portugal", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 2", "cls": "ziggo", "free": false}}, {"sk": "2026-04-16 18:45", "day": "Do 16 apr", "time": "18:45", "date": "2026-04-16", "comp": "Europa League", "leagueKey": "el", "flag": "🏆", "home": "Celta de Vigo", "away": "SC Freiburg", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 3", "cls": "ziggo", "free": false}}, {"sk": "2026-04-16 18:45", "day": "Do 16 apr", "time": "18:45", "date": "2026-04-16", "comp": "Conference League", "leagueKey": "conf", "flag": "🏆", "home": "AZ", "away": "FC Shakhtar Donetsk", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport", "cls": "ziggo", "free": false}}, {"sk": "2026-04-16 21:00", "day": "Do 16 apr", "time": "21:00", "date": "2026-04-16", "comp": "Europa League", "leagueKey": "el", "flag": "🏆", "home": "Real Betis", "away": "S.C. Braga", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 5", "cls": "ziggo", "free": false}}, {"sk": "2026-04-16 21:00", "day": "Do 16 apr", "time": "21:00", "date": "2026-04-16", "comp": "Europa League", "leagueKey": "el", "flag": "🏆", "home": "Nottingham Forest", "away": "F.C. Porto", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 3", "cls": "ziggo", "free": false}}, {"sk": "2026-04-16 21:00", "day": "Do 16 apr", "time": "21:00", "date": "2026-04-16", "comp": "Europa League", "leagueKey": "el", "flag": "🏆", "home": "Aston Villa", "away": "Bologna F.C. 1909", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 6", "cls": "ziggo", "free": false}}, {"sk": "2026-04-16 21:00", "day": "Do 16 apr", "time": "21:00", "date": "2026-04-16", "comp": "Conference League", "leagueKey": "conf", "flag": "🏆", "home": "Fiorentina", "away": "Crystal Palace", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport", "cls": "ziggo", "free": false}}];
-  document.getElementById('fetch-status').textContent='Speelschema (noodversie)';
-  render();
+  try{
+    const res=await fetch('/api/matches',{cache:'no-store'});
+    if(!res.ok) throw new Error(`API ${res.status}`);
+    const data=await res.json();
+    if(!data.matches||data.matches.length===0)
+      throw new Error(data.error||'Geen wedstrijden ontvangen');
+    MATCHES=data.matches;
+    const t=data.fetched_at?new Date(data.fetched_at).toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'}):'?';
+    document.getElementById('fetch-status').textContent=`Bijgewerkt om ${t}`;
+    render();
+  }catch(err){
+    document.getElementById('main-content').innerHTML=`
+      <div class="error-msg">
+        <strong>Speelschema tijdelijk niet beschikbaar</strong>
+        Probeer het over enkele minuten opnieuw.
+      </div>`;
+    document.getElementById('fetch-status').textContent='Niet beschikbaar';
+    document.getElementById('stats-bar').innerHTML=
+      '<div class="stat-block"><div class="stat-label">Totaal</div><div class="stat-value">—</div></div>';
+  }
 }
+
 
 document.getElementById('cur-date').textContent=
   new Date().toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'long'});
