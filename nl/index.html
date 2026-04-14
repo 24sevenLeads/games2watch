@@ -104,7 +104,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:20px 16p
 .footer-inner{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
 .footer-logo{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:var(--muted)}
 .footer-logo span{color:var(--champ)}
-.footer-source{font-size:10px;color:var(--muted)}
+.footer-source{font-size:11px;color:var(--muted);text-align:right}
 
 @media(max-width:580px){
   .match-row{grid-template-columns:44px 1fr 90px}
@@ -310,8 +310,11 @@ async function loadMatches(){
     if(!data.matches||data.matches.length===0)
       throw new Error(data.error||'Geen wedstrijden ontvangen');
     MATCHES=data.matches;
-    const t=data.fetched_at?new Date(data.fetched_at).toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'}):'?';
-    document.getElementById('fetch-status').textContent=`Bijgewerkt om ${t}`;
+    const ft=data.fetched_at?new Date(data.fetched_at):null;
+    const td=ft?ft.toLocaleDateString('nl-NL',{day:'numeric',month:'short'}):'?';
+    const tt=ft?ft.toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'}):'?';
+    const isToday=ft&&new Date().toDateString()===ft.toDateString();
+    document.getElementById('fetch-status').textContent=`Speelschema bijgewerkt: ${isToday?tt:td+' '+tt}`;
     render();
   }catch(err){
     document.getElementById('main-content').innerHTML=`
