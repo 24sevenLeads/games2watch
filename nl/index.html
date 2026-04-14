@@ -71,7 +71,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-
 .team-line{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .team-rank{font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--muted);min-width:24px;flex-shrink:0}
 .team-name{font-weight:600;font-size:13px}
-.vs-row{font-size:10px;color:var(--muted);padding-left:30px}
+.vs-row{font-size:10px;color:var(--muted);padding-left:30px}.leg-score{color:#f59e0b;font-weight:700;font-size:11px}
 .stake-badge{font-size:9px;font-weight:600;letter-spacing:0.04em;padding:2px 6px;border-radius:3px;white-space:nowrap}
 .b-champ    {background:#f59e0b22;color:var(--champ);    border:1px solid #f59e0b44}
 .b-cl-direct{background:#3b82f622;color:var(--cl-direct);border:1px solid #3b82f644}
@@ -285,7 +285,7 @@ function render(){
             <span class="team-name">${m.home}</span>
             ${badgeHtml(m.stakeH)}
           </div>
-          <div class="vs-row">vs</div>
+          <div class="vs-row">${m.legScore?`<span class="leg-score">heen: ${m.legScore}</span>`:'vs'}</div>
           <div class="team-line">
             <span class="team-rank">${rankA}</span>
             <span class="team-name">${m.away}</span>
