@@ -303,29 +303,13 @@ function render(){
 }
 
 async function loadMatches(){
-  try{
-    const res=await fetch('/api/matches',{cache:'no-store'});
-    if(!res.ok) throw new Error(`API ${res.status}`);
-    const data=await res.json();
-    if(!data.matches||data.matches.length===0)
-      throw new Error(data.error||'Geen wedstrijden ontvangen');
-    MATCHES=data.matches;
-    const ft=data.fetched_at?new Date(data.fetched_at):null;
-    const td=ft?ft.toLocaleDateString('nl-NL',{day:'numeric',month:'short'}):'?';
-    const tt=ft?ft.toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'}):'?';
-    const isToday=ft&&new Date().toDateString()===ft.toDateString();
-    document.getElementById('fetch-status').textContent=`Speelschema bijgewerkt: ${isToday?tt:td+' '+tt}`;
-    render();
-  }catch(err){
-    document.getElementById('main-content').innerHTML=`
-      <div class="error-msg">
-        <strong>Speelschema tijdelijk niet beschikbaar</strong>
-        Probeer het over enkele minuten opnieuw.
-      </div>`;
-    document.getElementById('fetch-status').textContent='Niet beschikbaar';
-    document.getElementById('stats-bar').innerHTML=
-      '<div class="stat-block"><div class="stat-label">Totaal</div><div class="stat-value">—</div></div>';
-  }
+  // NOODVERSIE 14 apr — football-data.org rate limit
+  // Morgen terugzetten naar API versie
+  MATCHES = [{"sk": "2026-04-14 21:00", "day": "Di 14 apr", "time": "21:00", "date": "2026-04-14", "comp": "Champions League", "leagueKey": "cl", "flag": "🏆", "home": "Atlético Madrid", "away": "FC Barcelona", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 2", "cls": "ziggo", "free": false}, "legScore": "0-2"}, {"sk": "2026-04-14 21:00", "day": "Di 14 apr", "time": "21:00", "date": "2026-04-14", "comp": "Champions League", "leagueKey": "cl", "flag": "🏆", "home": "Liverpool", "away": "Paris Saint-Germain F.C.", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport", "cls": "ziggo", "free": false}, "legScore": "2-0"}, {"sk": "2026-04-15 21:00", "day": "Wo 15 apr", "time": "21:00", "date": "2026-04-15", "comp": "Champions League", "leagueKey": "cl", "flag": "🏆", "home": "Arsenal", "away": "Sporting Clube de Portugal", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 2", "cls": "ziggo", "free": false}, "legScore": "0-1"}, {"sk": "2026-04-15 21:00", "day": "Wo 15 apr", "time": "21:00", "date": "2026-04-15", "comp": "Champions League", "leagueKey": "cl", "flag": "🏆", "home": "Bayern München", "away": "Real Madrid C.F.", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport", "cls": "ziggo", "free": false}, "legScore": "1-2"}, {"sk": "2026-04-16 18:45", "day": "Do 16 apr", "time": "18:45", "date": "2026-04-16", "comp": "Europa League", "leagueKey": "el", "flag": "🏆", "home": "Celta de Vigo", "away": "SC Freiburg", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 3", "cls": "ziggo", "free": false}, "legScore": "3-0"}, {"sk": "2026-04-16 18:45", "day": "Do 16 apr", "time": "18:45", "date": "2026-04-16", "comp": "Conference League", "leagueKey": "conf", "flag": "🏆", "home": "AZ", "away": "FC Shakhtar Donetsk", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport", "cls": "ziggo", "free": false}, "legScore": null}, {"sk": "2026-04-16 21:00", "day": "Do 16 apr", "time": "21:00", "date": "2026-04-16", "comp": "Europa League", "leagueKey": "el", "flag": "🏆", "home": "Real Betis", "away": "S.C. Braga", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 5", "cls": "ziggo", "free": false}, "legScore": "1-1"}, {"sk": "2026-04-16 21:00", "day": "Do 16 apr", "time": "21:00", "date": "2026-04-16", "comp": "Europa League", "leagueKey": "el", "flag": "🏆", "home": "Nottingham Forest", "away": "F.C. Porto", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 3", "cls": "ziggo", "free": false}, "legScore": "1-1"}, {"sk": "2026-04-16 21:00", "day": "Do 16 apr", "time": "21:00", "date": "2026-04-16", "comp": "Europa League", "leagueKey": "el", "flag": "🏆", "home": "Aston Villa", "away": "Bologna F.C. 1909", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 6", "cls": "ziggo", "free": false}, "legScore": "1-3"}, {"sk": "2026-04-16 21:00", "day": "Do 16 apr", "time": "21:00", "date": "2026-04-16", "comp": "Conference League", "leagueKey": "conf", "flag": "🏆", "home": "Fiorentina", "away": "Crystal Palace", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 2", "cls": "ziggo", "free": false}, "legScore": null}];
+  const _now = new Date();
+  const _tt = _now.toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('fetch-status').textContent=`Speelschema bijgewerkt: ${_tt}`;
+  render();
 }
 
 
