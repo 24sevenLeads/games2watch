@@ -1,6 +1,7 @@
-// api/matches.js — v12
-// Wedstrijddata: football-data.org | TV-info: iservoetbalvanavond.nl
-// Lege responses worden NOOIT gecached (voorkomt 24u vastzitten bij 429)
+// api/matches.js — v13
+// Speelschema: football-data.org
+// TV-info: iservoetbalvanavond.nl homepage (komende ~3 dagen)
+// EL + Conference League: iservoetbalvanavond.nl seizoenspagina's (incl. heenwedstrijd scores)
 
 const BASE_URL  = 'https://api.football-data.org/v4';
 const TV_SOURCE = 'https://www.iservoetbalvanavond.nl';
@@ -15,7 +16,21 @@ const LEAGUES = [
   { key: 'cl',  code: 'CL',  name: 'Champions League', flag: '🏆' },
 ];
 
-// iservoetbalvanavond.nl naam → football-data.org naam
+const EL_CONF_SOURCES = [
+  {
+    key: 'el',
+    name: 'Europa League',
+    flag: '🏆',
+    url: 'https://www.iservoetbalvanavond.nl/competities/uefa/europa-league-2025-2026',
+  },
+  {
+    key: 'conf',
+    name: 'Conference League',
+    flag: '🏆',
+    url: 'https://www.iservoetbalvanavond.nl/competities/uefa/conference-league-2025-2026',
+  },
+];
+
 const NAME_MAP = {
   'manchester united': 'Manchester United FC',
   'leeds united': 'Leeds United FC',
@@ -93,52 +108,96 @@ function normalizeChannel(raw) {
   if (lower.includes('prime'))   return { label: 'Prime Video', cls: 'prime', free: false };
   if (lower.startsWith('npo'))   return { label: name, cls: 'npo', free: true };
   if (lower.startsWith('rtl'))   return { label: name, cls: 'npo', free: true };
-  if (lower.includes('disney'))  return { label: 'Disney+', cls: 'other', free: false };
   return { label: name, cls: 'other', free: false };
 }
 
+function defaultTV(leagueKey) {
+  const map = {
+    pl:   { label: 'Viaplay',     cls: 'viaplay', free: false },
+    bl:   { label: 'Viaplay',     cls: 'viaplay', free: false },
+    ed:   { label: 'ESPN',        cls: 'espn',    free: false },
+    ll:   { label: 'Ziggo Sport', cls: 'ziggo',   free: false },
+    sa:   { label: 'Ziggo Sport', cls: 'ziggo',   free: false },
+    l1:   { label: 'Viaplay',     cls: 'viaplay', free: false },
+    cl:   { label: 'Ziggo Sport', cls: 'ziggo',   free: false },
+    el:   { label: 'Ziggo Sport', cls: 'ziggo',   free: false },
+    conf: { label: 'Ziggo Sport', cls: 'ziggo',   free: false },
+  };
+  return map[leagueKey] || { label: '?', cls: 'other', free: false };
+}
+
+// Parse markdown-like tekst van iservoetbalvanavond.nl naar een lijst van wedstrijden
+// met home, away, scoreH, scoreA, channel
+function parseIsvPage(html) {
+  const text = html
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<a[^>]*>\s*([^<]+?)\s*<\/a>/gi, (_, t) => t.trim())
+    .replace(/<tr[^>]*>/gi, '\nROW|')
+    .replace(/<td[^>]*>/gi, 'CELL|')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ').replace(/&#\d+;/g, '');
+
+  const entries = [];
+  for (const line of text.split('\n')) {
+    if (!line.includes('ROW|')) continue;
+    const cells = line.replace('ROW|', '').split('CELL|')
+      .map(c => c.replace(/\s+/g, ' ').trim())
+      .filter(c => c && !c.match(/^Logo\s/) && !c.match(/^[\-\s]+$/));
+
+    if (cells.length < 2) continue;
+
+    // Zoek cel met twee teamnamen (gescheiden door 2+ spaties)
+    let home = null, away = null, scoreH = null, scoreA = null, channel = null;
+
+    for (const cell of cells) {
+      const parts = cell.split(/\s{2,}/).map(p => p.trim()).filter(p => p.length > 1);
+      if (parts.length >= 2 && !home) {
+        home = parts[0];
+        away = parts[1];
+      }
+    }
+
+    // Zoek score cel: "1  2" of "-  -"
+    for (const cell of cells) {
+      const m = cell.match(/^(-|\d+)\s{1,4}(-|\d+)$/);
+      if (m) {
+        scoreH = m[1] === '-' ? null : parseInt(m[1]);
+        scoreA = m[2] === '-' ? null : parseInt(m[2]);
+      }
+    }
+
+    // Zoek zender (laatste niet-lege cel die geen naam is)
+    for (const cell of cells) {
+      if (cell && cell !== home && cell !== away && cell.length < 40
+          && !cell.match(/^\d+\s+\d+$/) && !cell.match(/^-\s+-$/)) {
+        const tv = normalizeChannel(cell);
+        if (tv && tv.cls !== 'other') channel = tv;
+      }
+    }
+
+    if (home && away) {
+      entries.push({ home, away, scoreH, scoreA, channel });
+    }
+  }
+  return entries;
+}
+
+// Haal TV lookup op van homepage (komende ~3 dagen)
 async function fetchTVLookup() {
   try {
     const res = await fetch(TV_SOURCE, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; games2watch/1.0)' },
     });
     if (!res.ok) return {};
     const html = await res.text();
-
-    let md = html
-      .replace(/<script[\s\S]*?<\/script>/gi, '')
-      .replace(/<style[\s\S]*?<\/style>/gi, '')
-      .replace(/<a[^>]*>\s*([^<]+?)\s*<\/a>/gi, (_, t) => t.trim())
-      .replace(/<tr[^>]*>/gi, '\nROW|')
-      .replace(/<td[^>]*>/gi, 'CELL|')
-      .replace(/<[^>]+>/g, '')
-      .replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ').replace(/&#\d+;/g, '');
-
+    const entries = parseIsvPage(html);
     const lookup = {};
-    for (const line of md.split('\n')) {
-      if (!line.includes('ROW|')) continue;
-      const cells = line.replace('ROW|', '').split('CELL|')
-        .map(c => c.replace(/\s+/g, ' ').trim())
-        .filter(c => c && !/^[\-\s]+$/.test(c) && !c.includes('Logo'));
-
-      let home = null, away = null, channel = null;
-      for (const cell of cells) {
-        const parts = cell.split(/\s{2,}/).map(p => p.trim()).filter(p => p.length > 1);
-        if (parts.length >= 2 && !home) {
-          home = parts[0]; away = parts[1];
-          if (parts.length > 2) channel = parts[parts.length - 1];
-        } else if (home && !channel && cell.length < 35) {
-          channel = cell.split(/\s{2,}/)[0].trim();
-        }
-      }
-
-      if (home && away && channel) {
-        const tv = normalizeChannel(channel);
-        if (!tv) continue;
-        const fdHome = NAME_MAP[home.toLowerCase()] || home;
-        const fdAway = NAME_MAP[away.toLowerCase()] || away;
-        lookup[`${fdHome.toLowerCase()}|||${fdAway.toLowerCase()}`] = tv;
-      }
+    for (const { home, away, channel } of entries) {
+      if (!channel) continue;
+      const fdHome = NAME_MAP[home.toLowerCase()] || home;
+      const fdAway = NAME_MAP[away.toLowerCase()] || away;
+      lookup[`${fdHome.toLowerCase()}|||${fdAway.toLowerCase()}`] = channel;
     }
     return lookup;
   } catch(e) {
@@ -146,18 +205,140 @@ async function fetchTVLookup() {
   }
 }
 
-// Fallback: alleen zendernaam, geen gratis/betaald gok
-function defaultTV(leagueKey) {
-  const map = {
-    pl: { label: 'Viaplay',     cls: 'viaplay', free: false },
-    bl: { label: 'Viaplay',     cls: 'viaplay', free: false },
-    ed: { label: 'ESPN',        cls: 'espn',    free: false },
-    ll: { label: 'Ziggo Sport', cls: 'ziggo',   free: false },
-    sa: { label: 'Ziggo Sport', cls: 'ziggo',   free: false },
-    l1: { label: 'Viaplay',     cls: 'viaplay', free: false },
-    cl: { label: 'Ziggo Sport', cls: 'ziggo',   free: false },
-  };
-  return map[leagueKey] || { label: '?', cls: 'other', free: false };
+// Haal EL/CONF wedstrijden op van seizoenspagina
+// Geeft: { upcoming: [{home, away, time, date, day, tv}], legScores: {"home|away": "sH-sA"} }
+async function fetchELConfMatches(source) {
+  try {
+    const res = await fetch(source.url, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; games2watch/1.0)' },
+    });
+    if (!res.ok) return { upcoming: [], legScores: {} };
+    const html = await res.text();
+
+    // Parse de pagina voor datums, tijden, teams en scores
+    // De pagina heeft: ## Sectietitel, ### Rondenaam, #### Datumheader, tijdstip, gevolgd door tabelrijen
+    const text = html
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[\s\S]*?<\/style>/gi, '')
+      .replace(/<a[^>]*href="[^"]*"[^>]*>\s*([^<]+?)\s*<\/a>/gi, (_, t) => t.trim())
+      .replace(/<h4[^>]*>/gi, '\n__DATE__')
+      .replace(/<\/h4>/gi, '\n')
+      .replace(/<tr[^>]*>/gi, '\nROW|')
+      .replace(/<td[^>]*>/gi, 'CELL|')
+      .replace(/<[^>]+>/g, '')
+      .replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ').replace(/&#\d+;/g, '');
+
+    const NL_DAG = { maandag:'Ma', dinsdag:'Di', woensdag:'Wo', donderdag:'Do', vrijdag:'Vr', zaterdag:'Za', zondag:'Zo' };
+    const NL_MAAND = { januari:1, februari:2, maart:3, april:4, mei:5, juni:6, juli:7, augustus:8, september:9, oktober:10, november:11, december:12 };
+    const NL_MAAND_LABEL = ['','jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+
+    const today = new Date();
+    const future = new Date(); future.setDate(today.getDate() + 14);
+
+    let currentDateStr = null;
+    let currentDayLabel = null;
+    let currentTime = null;
+
+    // legScores: { "home_lower|away_lower": "sH-sA" } voor gespeelde wedstrijden
+    const legScores = {};
+    // upcoming: aankomende wedstrijden binnen 14 dagen
+    const upcoming = [];
+
+    for (const line of text.split('\n')) {
+      const l = line.trim();
+      if (!l) continue;
+
+      // Datumheader zoals "Donderdag 16 april"
+      if (l.startsWith('__DATE__')) {
+        const dateStr = l.replace('__DATE__', '').trim();
+        const parts = dateStr.toLowerCase().split(/\s+/);
+        if (parts.length >= 3) {
+          const dagStr = NL_DAG[parts[0]] || parts[0].substring(0,2);
+          const dag = parseInt(parts[1]);
+          const maandNum = NL_MAAND[parts[2]] || 1;
+          const jaar = today.getFullYear();
+          const d = new Date(jaar, maandNum - 1, dag);
+          // Volgend jaar als de datum al voorbij is maar het getal kleiner is dan de huidige maand
+          if (d < new Date(today.getFullYear(), today.getMonth(), today.getDate() - 30)) {
+            d.setFullYear(jaar + 1);
+          }
+          currentDateStr = d.toISOString().split('T')[0];
+          currentDayLabel = `${dagStr} ${dag} ${NL_MAAND_LABEL[maandNum]}`;
+        }
+        currentTime = null;
+        continue;
+      }
+
+      // Tijdstip
+      if (/^\d{2}:\d{2}$/.test(l)) {
+        currentTime = l;
+        continue;
+      }
+
+      // Wedstrijdrij
+      if (l.startsWith('ROW|') && currentTime && currentDateStr) {
+        const cells = l.replace('ROW|', '').split('CELL|')
+          .map(c => c.replace(/\s+/g, ' ').trim())
+          .filter(c => c && !c.match(/^Logo\s/));
+
+        let home = null, away = null, scoreH = null, scoreA = null;
+
+        // Zoek teamnamen (cel met 2+ woorden, gescheiden door 2+ spaties)
+        for (const cell of cells) {
+          const parts = cell.split(/\s{2,}/).map(p => p.trim()).filter(p => p.length > 1);
+          if (parts.length >= 2 && !home) {
+            home = parts[0];
+            away = parts[1];
+          }
+        }
+
+        // Zoek score
+        for (const cell of cells) {
+          const m = cell.trim().match(/^(-|\d+)\s{1,4}(-|\d+)$/);
+          if (m) {
+            scoreH = m[1] === '-' ? null : parseInt(m[1]);
+            scoreA = m[2] === '-' ? null : parseInt(m[2]);
+          }
+        }
+
+        if (!home || !away) continue;
+
+        const homeLow = home.toLowerCase();
+        const awayLow = away.toLowerCase();
+
+        if (scoreH !== null && scoreA !== null) {
+          // Gespeelde wedstrijd → opslaan als heenwedstrijd reference
+          legScores[`${homeLow}|||${awayLow}`] = `${scoreH}-${scoreA}`;
+        } else {
+          // Aankomende wedstrijd — check of het binnen 14 dagen is
+          const matchDate = new Date(currentDateStr + 'T12:00:00Z');
+          if (matchDate >= today && matchDate <= future) {
+            // Zoek zender
+            let tv = null;
+            for (const cell of cells) {
+              if (cell && cell !== home && cell !== away && cell.length < 40) {
+                const attempt = normalizeChannel(cell);
+                if (attempt && attempt.cls !== 'other') { tv = attempt; break; }
+              }
+            }
+
+            upcoming.push({
+              home, away,
+              homeLow, awayLow,
+              date: currentDateStr,
+              day: currentDayLabel,
+              time: currentTime,
+              tv: tv || defaultTV(source.key),
+            });
+          }
+        }
+      }
+    }
+
+    return { upcoming, legScores };
+  } catch(e) {
+    return { upcoming: [], legScores: {} };
+  }
 }
 
 function findTV(home, away, leagueKey, tvLookup) {
@@ -193,7 +374,7 @@ const STAKE_ZONES = {
 
 function clubStake(leagueKey, rank) {
   const zones = STAKE_ZONES[leagueKey];
-  if (!zones || !zones.length || !rank) return 'mid';
+  if (!zones || !rank) return 'mid';
   const last = zones[zones.length - 1];
   if (rank >= (last.rDir || last.total - 1)) return 'rel-dir';
   if (rank >= (last.rPO  || last.total - 2)) return 'rel-po';
@@ -226,7 +407,9 @@ export default async function handler(req, res) {
   const dateTo   = toDateStr(future);
 
   try {
-    const tvPromise = fetchTVLookup();
+    // Start alle fetches parallel
+    const tvPromise      = fetchTVLookup();
+    const elConfPromises = EL_CONF_SOURCES.map(s => fetchELConfMatches(s));
 
     const leagueResults = await Promise.all(
       LEAGUES.map(async (league) => {
@@ -242,10 +425,11 @@ export default async function handler(req, res) {
       })
     );
 
-    const tvLookup = await tvPromise;
-    const matches  = [];
-    const errors   = [];
+    const [tvLookup, ...elConfResults] = await Promise.all([tvPromise, ...elConfPromises]);
+    const matches = [];
+    const errors  = [];
 
+    // Verwerk football-data.org competities
     for (const { league, events, status, error } of leagueResults) {
       if (error || (status && status !== 200)) {
         errors.push(`${league.code}: ${error || status}`);
@@ -273,13 +457,40 @@ export default async function handler(req, res) {
           stakeH: rH ? clubStake(league.key, rH) : 'mid',
           stakeA: rA ? clubStake(league.key, rA) : 'mid',
           tv: findTV(home, away, league.key, tvLookup),
+          legScore: null,
+        });
+      }
+    }
+
+    // Verwerk EL + Conference League
+    for (let i = 0; i < EL_CONF_SOURCES.length; i++) {
+      const source = EL_CONF_SOURCES[i];
+      const { upcoming, legScores } = elConfResults[i];
+
+      for (const m of upcoming) {
+        // Zoek heenwedstrijd score: de retourwedstrijd heeft home/away omgedraaid t.o.v. heen
+        const legKey = `${m.awayLow}|||${m.homeLow}`;
+        const legScore = legScores[legKey] || null;
+
+        // Zoek ook in de TV lookup van de homepage
+        const tvFromHome = tvLookup[`${m.homeLow}|||${m.awayLow}`];
+
+        matches.push({
+          sk: `${m.date} ${m.time}`,
+          day: m.day,
+          time: m.time, date: m.date,
+          comp: source.name, leagueKey: source.key, flag: source.flag,
+          home: m.home, away: m.away,
+          rH: null, rA: null,
+          stakeH: 'mid', stakeA: 'mid',
+          tv: tvFromHome || m.tv,
+          legScore,  // bijv. "3-0" of "1-1" of null
         });
       }
     }
 
     matches.sort((a, b) => a.sk.localeCompare(b.sk));
 
-    // Nooit een lege response cachen
     if (matches.length > 0) {
       res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=3600');
     } else {
@@ -287,9 +498,9 @@ export default async function handler(req, res) {
     }
 
     return res.status(200).json({
-      source: 'football-data.org + iservoetbalvanavond.nl',
+      source:     'football-data.org + iservoetbalvanavond.nl',
       fetched_at: new Date().toISOString(),
-      count: matches.length,
+      count:      matches.length,
       ...(errors.length > 0 ? { errors } : {}),
       matches,
     });
