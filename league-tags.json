@@ -1,0 +1,82 @@
+{
+  "_comment": "Positie (string) → tag per competitie. Posities niet genoemd krijgen 'mid'.",
+  "pl": {
+    "1": "champ", "2": "champ",
+    "3": "cl-direct", "4": "cl-direct", "5": "cl-direct",
+    "6": "el-direct",
+    "7": "el-pre",
+    "18": "rel-playoff",
+    "19": "rel-direct", "20": "rel-direct"
+  },
+  "champ": {
+    "1": "champ",
+    "2": "cl-direct",
+    "3": "cl-pre", "4": "cl-pre", "5": "cl-pre", "6": "cl-pre",
+    "22": "rel-direct", "23": "rel-direct", "24": "rel-direct"
+  },
+  "ed": {
+    "1": "champ", "2": "cl-direct",
+    "3": "cl-pre", "4": "cl-pre", "5": "cl-pre",
+    "16": "rel-playoff",
+    "17": "rel-direct", "18": "rel-direct"
+  },
+  "kkd": {
+    "1": "champ",
+    "2": "cl-direct",
+    "3": "cl-pre", "4": "cl-pre", "5": "cl-pre", "6": "cl-pre", "7": "cl-pre", "8": "cl-pre",
+    "jong": "mid"
+  },
+  "bl": {
+    "1": "champ",
+    "2": "cl-direct", "3": "cl-direct", "4": "cl-direct",
+    "5": "el-direct",
+    "6": "el-pre",
+    "7": "conf",
+    "16": "rel-playoff",
+    "17": "rel-direct", "18": "rel-direct"
+  },
+  "bl2": {
+    "1": "champ",
+    "2": "cl-direct",
+    "3": "cl-pre", "4": "cl-pre", "5": "cl-pre",
+    "16": "rel-playoff",
+    "17": "rel-direct", "18": "rel-direct"
+  },
+  "sa": {
+    "1": "champ",
+    "2": "cl-direct", "3": "cl-direct", "4": "cl-direct",
+    "5": "cl-pre",
+    "6": "el-direct",
+    "7": "el-pre",
+    "8": "conf",
+    "18": "rel-direct", "19": "rel-direct", "20": "rel-direct"
+  },
+  "ll": {
+    "1": "champ",
+    "2": "cl-direct", "3": "cl-direct", "4": "cl-direct",
+    "5": "el-direct",
+    "6": "el-pre",
+    "18": "rel-direct", "19": "rel-direct", "20": "rel-direct"
+  },
+  "l1": {
+    "1": "champ",
+    "2": "cl-direct",
+    "3": "cl-pre",
+    "4": "el-direct", "5": "el-direct",
+    "6": "el-pre",
+    "7": "conf",
+    "16": "rel-playoff",
+    "17": "rel-direct", "18": "rel-direct"
+  },
+  "primeiraliga": {
+    "1": "champ",
+    "2": "cl-direct",
+    "3": "cl-pre",
+    "4": "el-direct",
+    "16": "rel-playoff",
+    "17": "rel-direct", "18": "rel-direct"
+  },
+  "cl": {}, "el": {}, "conf": {},
+  "facup": {}, "knvb": {}, "dfbpokal": {},
+  "copadelrey": {}, "coppaitalia": {}, "coupedefrance": {}, "tacaportugal": {}
+}
