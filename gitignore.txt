@@ -1,0 +1,6 @@
+# Python
+__pycache__/
+*.pyc
+
+# Data cache — verwijder deze regel als je standen history wilt bijhouden
+# data/
