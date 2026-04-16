@@ -1,0 +1,26 @@
+{
+  "_comment": "Kanaalconfiguratie. free:true = gratis te ontvangen voor de meeste kijkers in NL.",
+  "channels": {
+    "ESPN":        { "cls": "espn",   "free": true,  "label": "ESPN" },
+    "ESPN 1":      { "cls": "espn",   "free": true,  "label": "ESPN" },
+    "Star Channel": { "cls": "other", "free": true,  "label": "Star Channel" },
+    "NPO 1":       { "cls": "npo",    "free": true,  "label": "NPO 1" },
+    "NPO 2":       { "cls": "npo",    "free": true,  "label": "NPO 2" },
+    "NPO 3":       { "cls": "npo",    "free": true,  "label": "NPO 3" },
+    "RTL 7":       { "cls": "other",  "free": true,  "label": "RTL 7" },
+    "ESPN 2":      { "cls": "espn",   "free": false, "label": "ESPN 2" },
+    "ESPN 3":      { "cls": "espn",   "free": false, "label": "ESPN 3" },
+    "ESPN 4":      { "cls": "espn",   "free": false, "label": "ESPN 4" },
+    "Ziggo Sport": { "cls": "ziggo",  "free": false, "label": "Ziggo Sport" },
+    "Ziggo Sport 2": { "cls": "ziggo","free": false, "label": "Ziggo Sport 2" },
+    "Ziggo Sport 3": { "cls": "ziggo","free": false, "label": "Ziggo Sport 3" },
+    "Ziggo Sport 4": { "cls": "ziggo","free": false, "label": "Ziggo Sport 4" },
+    "Ziggo Sport 5": { "cls": "ziggo","free": false, "label": "Ziggo Sport 5" },
+    "Ziggo Sport 6": { "cls": "ziggo","free": false, "label": "Ziggo Sport 6" },
+    "Viaplay":     { "cls": "viaplay","free": false, "label": "Viaplay" },
+    "Viaplay TV":  { "cls": "viaplay","free": false, "label": "Viaplay TV" },
+    "Prime Video": { "cls": "prime",  "free": false, "label": "Prime Video" },
+    "Prime video": { "cls": "prime",  "free": false, "label": "Prime Video" }
+  },
+  "_default": { "cls": "other", "free": false }
+}
