@@ -67,6 +67,7 @@
     "NAC Breda": 17,
     "Heracles Almelo": 18
   },
+  "kkd": {},
   "bl": {
     "Bayern München": 1,
     "Borussia Dortmund": 2,
@@ -86,6 +87,16 @@
     "FC St. Pauli 1910": 16,
     "VfL Wolfsburg": 17,
     "1. FC Heidenheim": 18
+  },
+  "bl2": {
+    "Schalke": 1,
+    "Paderborn": 2,
+    "Form": 3,
+    "Hertha Berlin": 6,
+    "Kaiserslautern": 7,
+    "Bochum": 10,
+    "Greuther Fürth": 17,
+    "Preußen Münster": 18
   },
   "sa": {
     "Inter Milan": 1,
