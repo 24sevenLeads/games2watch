@@ -41,17 +41,18 @@ SKIP_WORDS = ['youth','u19','u21','vrouwen','dames','women',
 
 JONG_TEAMS = {'Jong Ajax','Jong PSV','Jong AZ','Jong FC Utrecht','Jong Utrecht'}
 
-STANDINGS_URLS = {
-    'pl':           'https://en.wikipedia.org/wiki/2025%E2%80%9326_Premier_League',
-    'champ':        'https://en.wikipedia.org/wiki/2025%E2%80%9326_EFL_Championship',
-    'ed':           'https://en.wikipedia.org/wiki/2025%E2%80%9326_Eredivisie',
-    'kkd':          'https://en.wikipedia.org/wiki/2025%E2%80%9326_Eerste_Divisie',
-    'bl':           'https://en.wikipedia.org/wiki/2025%E2%80%9326_Bundesliga',
-    'bl2':          'https://en.wikipedia.org/wiki/2025%E2%80%9326_2._Bundesliga',
-    'sa':           'https://en.wikipedia.org/wiki/2025%E2%80%9326_Serie_A',
-    'll':           'https://en.wikipedia.org/wiki/2025%E2%80%9326_La_Liga',
-    'l1':           'https://en.wikipedia.org/wiki/2025%E2%80%9326_Ligue_1',
-    'primeiraliga': 'https://en.wikipedia.org/wiki/2025%E2%80%9326_Liga_Portugal_Betclic',
+# football-data.org competition IDs
+STANDINGS_IDS = {
+    'pl':           2021,  # Premier League
+    'champ':        2016,  # Championship
+    'ed':           2003,  # Eredivisie
+    'kkd':          None,  # KKD niet beschikbaar in gratis tier
+    'bl':           2002,  # Bundesliga
+    'bl2':          None,  # 2.Bundesliga niet in gratis tier
+    'sa':           2019,  # Serie A
+    'll':           2014,  # La Liga
+    'l1':           2015,  # Ligue 1
+    'primeiraliga': 2017,  # Primeira Liga
 }
 
 
@@ -192,55 +193,40 @@ def fetch_schedule():
     return matches
 
 
-# ── Stap 2: Standen ─────────────────────────────────────────────────────────
+# ── Stap 2: Standen via football-data.org ───────────────────────────────────
 def fetch_standings():
-    print("Stap 2: Standen ophalen...")
+    print("Stap 2: Standen ophalen via football-data.org...")
     standings = {}
 
-    for league_key, url in STANDINGS_URLS.items():
+    import os
+    api_key = os.environ.get('FOOTBALL_DATA_API_KEY', '')
+    if not api_key:
+        print("  FOUT: FOOTBALL_DATA_API_KEY niet gevonden")
+        return standings
+
+    for league_key, comp_id in STANDINGS_IDS.items():
+        if comp_id is None:
+            print(f"  -> {league_key}: overgeslagen (niet in API)")
+            continue
         try:
-            html = fetch(url)
+            url = f"https://api.football-data.org/v4/competitions/{comp_id}/standings"
+            req = Request(url, headers={
+                'X-Auth-Token': api_key,
+                'User-Agent': 'games2watch/1.0',
+            })
+            with urlopen(req, timeout=15) as r:
+                data = json.loads(r.read())
+
             teams = {}
-
-            # Sla de infobox over: zoek de eerste wikitable na de infobox
-            # Infobox eindigt voor de eerste "wikitable sortable" tabel
-            table_m = re.search(
-                r'<table[^>]*class="[^"]*wikitable[^"]*sortable[^"]*"[^>]*>(.*?)</table>',
-                html, re.S)
-            if not table_m:
-                # Fallback: eerste wikitable
-                table_m = re.search(
-                    r'<table[^>]*class="[^"]*wikitable[^"]*"[^>]*>(.*?)</table>',
-                    html, re.S)
-            if not table_m:
-                print(f"  -> {league_key}: geen wikitable gevonden")
-                continue
-
-            table_html = table_m.group(1)
-            tr_blocks = re.findall(r'<tr[^>]*>(.*?)</tr>', table_html, re.S)
-
-            for tr in tr_blocks:
-                if 'infobox' in tr:
+            # API geeft standings als lijst van tabellen (TOTAL, HOME, AWAY)
+            for table in data.get('standings', []):
+                if table.get('type') != 'TOTAL':
                     continue
-                # Positienummer in th scope=row
-                pos_m = re.search(r'<th[^>]+scope="row"[^>]*>\s*(\d+)\s*<', tr)
-                if not pos_m:
-                    continue
-                pos = int(pos_m.group(1))
-                if pos > 24:
-                    break
-
-                # Teamnaam: eerste td met een wiki-link
-                td_links = re.findall(
-                    r'<td[^>]*>.*?<a[^>]+href="/wiki/[^"#]+"[^>]+title="([^"]+)"',
-                    tr, re.S)
-                for title in td_links:
-                    title = title.strip()
-                    clean = re.sub(r'\s*\([^)]+\)\s*$', '', title).strip()
-                    if clean and len(clean) > 2 and not clean.isdigit():
-                        if clean not in teams:
-                            teams[clean] = pos
-                        break
+                for row in table.get('table', []):
+                    pos  = row.get('position')
+                    team = row.get('team', {}).get('name', '')
+                    if pos and team and team not in teams:
+                        teams[team] = pos
 
             if teams:
                 top = min(teams, key=teams.get)
