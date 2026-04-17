@@ -240,54 +240,46 @@ def fetch_schedule():
 
 # ── Wikipedia standings parser ───────────────────────────────────────────────
 def parse_wikipedia_standings(url, max_pos=24):
-    """Universele Wikipedia standentabel parser."""
+    """Wikipedia standentabel parser - zoekt tabel met posities 1..N."""
     html = fetch(url)
     teams = {}
 
-    # Zoek ALLE wikitables, pak de eerste die posities 1-N bevat
     tables = re.findall(r'<table[^>]*wikitable[^>]*>(.*?)</table>', html, re.S)
 
     for table in tables:
         found = {}
         rows = re.findall(r'<tr[^>]*>(.*?)</tr>', table, re.S)
         for tr in rows:
-            # Positienummer: <th scope="row">N</th>
-            pos_m = re.search(r'<th[^>]+scope=["\']row["\'][^>]*>\s*(\d+)\s*</th>', tr)
+            if 'infobox-label' in tr:
+                continue
+            pos_m = re.search(r'<th[^>]+scope="row"[^>]*>\s*(\d+)\s*</th>', tr)
             if not pos_m:
                 continue
             pos = int(pos_m.group(1))
             if pos > max_pos:
                 break
 
-            # Teamnaam: zoek eerste <a> link in een <td> cel
-            # Strip HTML tags om de tekst te krijgen
-            tds = re.findall(r'<td[^>]*>(.*?)</td>', tr, re.S)
-            for td in tds:
-                # Zoek link met title of gewoon tekst
-                link_m = re.search(r'title="([^"]+)"', td)
-                if link_m:
-                    name = link_m.group(1).strip()
-                    # Verwijder disambiguatie
-                    name = re.sub(r'\s*\([^)]+\)\s*$', '', name).strip()
-                    if name and len(name) > 2 and not name.isdigit():
-                        found[name] = pos
-                        break
-                else:
-                    # Tekst zonder link
-                    text = re.sub(r'<[^>]+>', '', td).strip()
-                    if text and len(text) > 2 and not text.isdigit():
-                        found[text] = pos
-                        break
+            # Alle wiki-links in de rij, neem de eerste die een clubnaam is
+            all_links = re.findall(r'href="/wiki/([^"#]+)"[^>]*title="([^"]+)"', tr)
+            for href, title in all_links:
+                tl = title.lower()
+                # Skip links naar seizoenen, landen, personen
+                if any(x in tl for x in ['in football', 'football in', '2025', '2026',
+                                          'season', ' cup', ' league', 'association',
+                                          'stadium', 'arena']):
+                    continue
+                name = re.sub(r'\s*\([^)]+\)\s*$', '', title).strip()
+                if name and len(name) > 2 and not name.isdigit():
+                    found[name] = pos
+                    break
 
-        # Accepteer tabel als die minstens 5 teams heeft
-        if len(found) >= 5:
+        # Goede tabel heeft minstens 10 entries en bevat positie 1
+        if len(found) >= 10 and 1 in found.values():
             teams = found
             break
 
     return teams
 
-
-# ── KKD standings ─────────────────────────────────────────────────────────────
 def fetch_kkd_standings():
     html = fetch('https://keukenkampioendivisie.nl/klassement')
     m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.S)
