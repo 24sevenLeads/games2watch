@@ -150,17 +150,22 @@ def fetch_schedule():
             if isinstance(first_b, str):
                 ch_raw = first_b
             elif isinstance(first_b, dict):
-                bc = first_b.get('broadcastChannel') or {}
-                if isinstance(bc, dict):
-                    ch_raw = bc.get('name') or bc.get('shortName') or ''
-                if not ch_raw or ch_raw == '?':
-                    ch_raw = str(first_b.get('name') or first_b.get('channelName') or '?')
-                # Debug: print kanaalstructuur als we niets vinden
-                if ch_raw == '?':
-                    print(f"  DEBUG kanaal: {json.dumps(first_b)[:200]}")
+                # Probeer alle mogelijke veldnamen voor kanaalnaam
+                def extract_name(obj):
+                    if not isinstance(obj, dict): return ''
+                    return (obj.get('name') or obj.get('shortName') or
+                            obj.get('displayName') or obj.get('title') or '')
+                # broadcastChannel > channel > naam direct op object
+                ch_raw = (extract_name(first_b.get('broadcastChannel') or {}) or
+                          extract_name(first_b.get('channel') or {}) or
+                          extract_name(first_b) or '?')
 
-        if not isinstance(ch_raw, str):
+        if not isinstance(ch_raw, str) or not ch_raw:
             ch_raw = '?'
+
+        # Debug eerste kanaal object bij elke run
+        if broadcasts_list and matches == [] and len(broadcasts) > 0:
+            print(f"  DEBUG kanaal obj: {json.dumps(broadcasts_list[0])[:300]}")
 
         ch = channel_info(ch_raw)
 
@@ -216,13 +221,19 @@ def fetch_standings():
             for pos_str, row_html in rows:
                 pos = int(pos_str)
                 if pos > 24: break
-                # Zoek alle title attributen, neem de eerste die geen disambiguatie heeft
-                titles = re.findall(r'title="([^"]+)"', row_html)
-                for t in titles:
+                # Zoek teamnaam: link in de tweede <td> na de positie
+                # Wikipedia: <td><a href="/wiki/TeamName" title="TeamName">TeamName</a>
+                team_links = re.findall(
+                    r'<a[^>]+href="/wiki/[^"]*"[^>]*title="([^"]+)">', row_html)
+                for t in team_links:
                     t = t.strip()
-                    if t and '(' not in t and len(t) > 2 and t not in teams:
-                        teams[t] = pos
-                        break
+                    # Filter: geen disambiguation, geen "F.C." suffixen etc
+                    if t and len(t) > 2 and t not in teams:
+                        # Verwijder "(football club)" achtige toevoegingen
+                        t = re.sub(r'\s*\([^)]*\)\s*$', '', t).strip()
+                        if t:
+                            teams[t] = pos
+                            break
 
             if teams:
                 top = min(teams, key=teams.get)
