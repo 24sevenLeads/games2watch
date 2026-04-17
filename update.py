@@ -147,8 +147,20 @@ def fetch_schedule():
         ch_raw = '?'
         if broadcasts_list:
             first_b = broadcasts_list[0]
-            if isinstance(first_b, dict):
-                ch_raw = (first_b.get('broadcastChannel', {}) or {}).get('name', '') or                          first_b.get('name', '') or                          first_b.get('channel', '') or '?'
+            if isinstance(first_b, str):
+                ch_raw = first_b
+            elif isinstance(first_b, dict):
+                bc = first_b.get('broadcastChannel') or {}
+                if isinstance(bc, dict):
+                    ch_raw = bc.get('name') or bc.get('shortName') or ''
+                if not ch_raw or ch_raw == '?':
+                    ch_raw = str(first_b.get('name') or first_b.get('channelName') or '?')
+                # Debug: print kanaalstructuur als we niets vinden
+                if ch_raw == '?':
+                    print(f"  DEBUG kanaal: {json.dumps(first_b)[:200]}")
+
+        if not isinstance(ch_raw, str):
+            ch_raw = '?'
 
         ch = channel_info(ch_raw)
 
