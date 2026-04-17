@@ -149,6 +149,25 @@ TEAM_ALIASES = {
     'FC Porto':                      'F.C. Porto',
     'SL Benfica':                    'S.L. Benfica',
     'Sporting CP':                   'Sporting Clube de Portugal',
+    # 2. Bundesliga (bundesliga.com namen)
+    'Schalke':                       'FC Schalke 04',
+    'Paderborn':                     'SC Paderborn 07',
+    'Hannover':                      'Hannover 96',
+    'Elversberg':                    'SV Elversberg',
+    'Darmstadt':                     'SV Darmstadt 98',
+    'Hertha Berlin':                 'Hertha BSC',
+    'Kaiserslautern':                '1. FC Kaiserslautern',
+    'Karlsruhe':                     'Karlsruher SC',
+    'Nuremberg':                     '1. FC Nürnberg',
+    'Bochum':                        'VfL Bochum',
+    'Dynamo Dresden':                'SG Dynamo Dresden',
+    'Holstein Kiel':                 'Holstein Kiel',
+    'Arminia Bielefeld':             'DSC Arminia Bielefeld',
+    'Magdeburg':                     'FC Magdeburg',
+    'Greuther Fürth':                'SpVgg Greuther Fürth',
+    'Braunschweig':                  'Eintracht Braunschweig',
+    'Preußen Münster':               'SC Preußen Münster',
+    'Fortuna Düsseldorf':            'Fortuna Düsseldorf',
 }
 
 # football-data.org competition IDs
@@ -311,42 +330,54 @@ def fetch_kkd_standings():
         import json as _json
         m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.S)
         if not m:
+            print("  -> kkd: geen __NEXT_DATA__")
             return {}
         data = _json.loads(m.group(1))
-        # Zoek standings in de JSON
-        def find_list(obj, depth=0):
-            if depth > 6: return []
-            if isinstance(obj, list) and len(obj) > 5:
-                # Check of het een standlijst is
-                if isinstance(obj[0], dict) and any(
-                    k in obj[0] for k in ['position','rank','pos','plaats']
-                ):
-                    return obj
+        page_props = data.get('props', {}).get('pageProps', {})
+        print("  -> kkd pageProps keys: " + str(list(page_props.keys())[:8]))
+
+        # Zoek recursief naar een lijst met position + team info
+        def find_standings(obj, depth=0):
+            if depth > 8: return []
+            if isinstance(obj, list) and len(obj) >= 5:
+                first = obj[0] if obj else {}
+                if isinstance(first, dict):
+                    keys = set(first.keys())
+                    if keys & {'position','rank','standing','teamId','team'}:
+                        return obj
             if isinstance(obj, dict):
                 for v in obj.values():
-                    r = find_list(v, depth+1)
+                    r = find_standings(v, depth+1)
                     if r: return r
             elif isinstance(obj, list):
                 for item in obj:
-                    r = find_list(item, depth+1)
+                    r = find_standings(item, depth+1)
                     if r: return r
             return []
 
-        page_props = data.get('props', {}).get('pageProps', {})
-        rows = find_list(page_props)
+        rows = find_standings(page_props)
+        print("  -> kkd rows gevonden: " + str(len(rows)))
+        if rows:
+            print("  -> kkd row[0] keys: " + str(list(rows[0].keys())[:8]))
+
         teams = {}
         for row in rows:
             if not isinstance(row, dict): continue
-            pos = row.get('position') or row.get('rank') or row.get('pos')
+            pos = (row.get('position') or row.get('rank') or
+                   row.get('standing') or row.get('pos'))
             team_obj = row.get('team') or row.get('club') or {}
-            name = (team_obj.get('name') or team_obj.get('shortName') or
-                    row.get('teamName') or row.get('name') or '')
+            if isinstance(team_obj, dict):
+                name = (team_obj.get('name') or team_obj.get('shortName') or
+                        team_obj.get('displayName') or '')
+            else:
+                name = row.get('teamName') or row.get('name') or ''
             if pos and name:
                 teams[name] = int(pos)
-        print(f"  -> kkd (KKD site): {len(teams)} teams")
+
+        print("  -> kkd (KKD site): " + str(len(teams)) + " teams")
         return teams
     except Exception as e:
-        print(f"  -> kkd fout: {e}")
+        print("  -> kkd fout: " + str(e))
         return {}
 
 
