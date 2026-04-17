@@ -19,6 +19,8 @@ jobs:
           python-version: '3.12'
 
       - name: Update draaien
+        env:
+          FOOTBALL_DATA_API_KEY: ${{ secrets.FOOTBALL_DATA_API_KEY }}
         run: python3 update.py
 
       - name: Wijzigingen committen en pushen
