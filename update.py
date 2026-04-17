@@ -89,6 +89,32 @@ TEAM_ALIASES = {
     # Primeira Liga
     'FC Porto':'F.C. Porto', 'SL Benfica':'S.L. Benfica',
     'Sporting CP':'Sporting Clube de Portugal',
+    # Bundesliga 1
+    'FC St. Pauli':'FC St. Pauli',
+    # Ligue 1
+    'RC Lens':'Lens',
+    'FC Metz':'Metz',
+    'FC Nantes':'FC Nantes',
+    'Stade Brestois 29':'FC Brest',
+    'Angers SCO':'Angers',
+    'Angers':'Angers',
+    'SCO Angers':'Angers',
+    # Serie A
+    'Udinese Calcio':'Udinese',
+    'Parma Calcio 1913':'Parma',
+    'Torino FC':'Torino',
+    'ACF Fiorentina':'Fiorentina',
+    'Fiorentina':'Fiorentina',
+    'US Lecce':'US Lecce',
+    'Genoa CFC':'Genoa',
+    'AC Pisa 1909':'Pisa',
+    'US Cremonese':'Cremonese',
+    'Cremonese':'Cremonese',
+    # Primeira Liga
+    'C.D. Tondela':'Tondela',
+    'Tondela':'Tondela',
+    'SL Benfica':'S.L. Benfica',
+    # KKD - Jong teams matchen al via JONG_TEAMS filter
     # 2. Bundesliga (OpenLigaDB ShortName -> iservoetbalvanavond.nl)
     'Schalke':       'FC Schalke 04',
     'Paderborn':     'SC Paderborn 07',
