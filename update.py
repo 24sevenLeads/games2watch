@@ -42,7 +42,7 @@ SKIP_WORDS = ['youth','u19','u21','vrouwen','dames','women',
 JONG_TEAMS = {'Jong Ajax','Jong PSV','Jong AZ','Jong FC Utrecht','Jong Utrecht'}
 
 TEAM_ALIASES = {
-    # Premier League
+    # Premier League (football-data -> iservoetbalvanavond)
     'Arsenal FC':'Arsenal', 'Manchester City FC':'Manchester City',
     'Manchester United FC':'Manchester United', 'Aston Villa FC':'Aston Villa',
     'Liverpool FC':'Liverpool', 'Chelsea FC':'Chelsea',
@@ -65,57 +65,51 @@ TEAM_ALIASES = {
     'Leicester City FC':'Leicester City', 'Blackburn Rovers FC':'Blackburn Rovers',
     'Portsmouth FC':'Portsmouth', 'Oxford United FC':'Oxford United',
     'Sheffield United FC':'Sheffield United', 'Sheffield Wednesday FC':'Sheffield Wednesday',
+    # Uit standings.json - nog niet goed gemapped
+    'Queens Park Rangers FC':'Queens Park Rangers',
+    'Charlton Athletic FC':'Charlton Athletic',
+    'Wrexham AFC':'Wrexham',
     # Eredivisie
     'PSV Eindhoven':'PSV', 'AFC Ajax':'Ajax', 'Feyenoord Rotterdam':'Feyenoord',
-    'AZ Alkmaar':'AZ',
-    # Bundesliga
+    'AZ Alkmaar':'AZ', "FC Twente '65":'FC Twente', 'FC Twente':'FC Twente',
+    # Bundesliga 1
     'FC Bayern München':'Bayern München',
-    'TSG Hoffenheim':'TSG 1899 Hoffenheim', 'TSG 1899 Hoffenheim':'TSG 1899 Hoffenheim',
-    'FSV Mainz 05':'1. FSV Mainz 05', '1. FSV Mainz 05':'1. FSV Mainz 05',
+    'TSG Hoffenheim':'TSG 1899 Hoffenheim',
+    'FSV Mainz 05':'1. FSV Mainz 05',
     '1. FC Heidenheim 1846':'1. FC Heidenheim',
+    'FC St. Pauli 1910':'FC St. Pauli',        # standings heeft 1910 suffix
     # Serie A
     'FC Internazionale Milano':'Inter Milan', 'SSC Napoli':'Napoli',
     'Atalanta BC':'Atalanta', 'Juventus FC':'Juventus',
     'SS Lazio':'Lazio', 'AS Roma':'Roma', 'Bologna FC 1909':'Bologna F.C. 1909',
     'Hellas Verona FC':'Verona', 'Cagliari Calcio':'Cagliari',
+    'Udinese Calcio':'Udinese', 'Parma Calcio 1913':'Parma',
+    'Torino FC':'Torino', 'ACF Fiorentina':'Fiorentina',
+    'US Lecce':'US Lecce', 'Genoa CFC':'Genoa', 'AC Pisa 1909':'Pisa',
+    'US Cremonese':'Cremonese',
     # La Liga
     'Real Madrid CF':'Real Madrid C.F.',
     'Club Atlético de Madrid':'Atlético Madrid',
     'Real Betis Balompié':'Real Betis', 'Real Sociedad de Fútbol':'Real Sociedad',
+    'RC Celta de Vigo':'Celta de Vigo',         # standings heeft RC prefix
     # Ligue 1
     'Paris Saint-Germain FC':'Paris Saint-Germain F.C.',
-    'AS Monaco FC':'AS Monaco', 'RC Lens':'Lens',
+    'AS Monaco FC':'AS Monaco',
     'Stade Rennais FC 1901':'Stade Rennais F.C.',
-    # Primeira Liga
-    'FC Porto':'F.C. Porto', 'SL Benfica':'S.L. Benfica',
-    'Sporting CP':'Sporting Clube de Portugal',
-    # Bundesliga 1
-    'FC St. Pauli':'FC St. Pauli',
-    # Ligue 1
-    'RC Lens':'Lens',
-    'FC Metz':'Metz',
-    'FC Nantes':'FC Nantes',
+    'RC Lens':'Lens', 'Racing Club de Lens':'Lens',  # standings heeft volledige naam
+    'FC Lorient':'FC Lorient', 'Toulouse FC':'Toulouse FC',
+    'FC Metz':'Metz', 'FC Nantes':'FC Nantes',
     'Stade Brestois 29':'FC Brest',
-    'Angers SCO':'Angers',
-    'Angers':'Angers',
-    'SCO Angers':'Angers',
-    # Serie A
-    'Udinese Calcio':'Udinese',
-    'Parma Calcio 1913':'Parma',
-    'Torino FC':'Torino',
-    'ACF Fiorentina':'Fiorentina',
-    'Fiorentina':'Fiorentina',
-    'US Lecce':'US Lecce',
-    'Genoa CFC':'Genoa',
-    'AC Pisa 1909':'Pisa',
-    'US Cremonese':'Cremonese',
-    'Cremonese':'Cremonese',
+    'Angers SCO':'Angers', 'SCO Angers':'Angers',
     # Primeira Liga
-    'C.D. Tondela':'Tondela',
-    'Tondela':'Tondela',
+    'FC Porto':'F.C. Porto',
     'SL Benfica':'S.L. Benfica',
-    # KKD - Jong teams matchen al via JONG_TEAMS filter
-    # 2. Bundesliga (OpenLigaDB ShortName -> iservoetbalvanavond.nl)
+    'Sport Lisboa e Benfica':'S.L. Benfica',    # standings heeft volledige naam
+    'Sporting CP':'Sporting Clube de Portugal',
+    'SC Braga':'Sporting Clube de Braga',
+    'Sporting Clube de Braga':'Sporting Clube de Braga',
+    'CD Tondela':'Tondela', 'C.D. Tondela':'Tondela',
+    # 2. Bundesliga (OpenLigaDB ShortName -> iservoetbalvanavond.nl)    # 2. Bundesliga (OpenLigaDB ShortName -> iservoetbalvanavond.nl)
     'Schalke':       'FC Schalke 04',
     'Paderborn':     'SC Paderborn 07',
     'Elversberg':    'SV Elversberg',
