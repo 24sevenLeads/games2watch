@@ -202,12 +202,7 @@ def fetch_standings():
             html = fetch(url)
             teams = {}
 
-            # Wikipedia raw HTML: standtabel bevat rijen als:
-            # <tr>
-<th scope="row">1</th>
-<td>...</td>
-<td><a href="/wiki/X" title="Club">Club</a>
-            # Zoek alle <tr> blokken die een scope="row" positie bevatten
+            # Wikipedia raw HTML: zoek alle tr-blokken met positie en teamnaam
             tr_blocks = re.findall(r'<tr[^>]*>(.*?)</tr>', html, re.S)
 
             for tr in tr_blocks:
