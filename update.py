@@ -371,7 +371,7 @@ def fetch_bl2_standings():
             if m:
                 import json as _json
                 data = _json.loads(m.group(1))
-                print(f"  -> bl2 NEXT_DATA keys: {list(data.get("props",{}).get("pageProps",{}).keys())[:5]}")
+                print("  -> bl2 NEXT_DATA keys: " + str(list(data.get("props",{}).get("pageProps",{}).keys())[:5]))
         print(f"  -> bl2 (bundesliga.com): {len(teams)} teams")
         return teams
     except Exception as e:
