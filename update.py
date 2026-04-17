@@ -303,7 +303,10 @@ def apply_tags(matches, standings):
 
 # ── Stap 4: HTML genereren ───────────────────────────────────────────────────
 def write_html(matches):
-    now = datetime.datetime.now().strftime('%H:%M')
+    now_dt = datetime.datetime.now()
+    NL_DAYS = ['ma','di','wo','do','vr','za','zo']
+    NL_MONTHS = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec']
+    now = f"{NL_DAYS[now_dt.weekday()]} {now_dt.day} {NL_MONTHS[now_dt.month-1]} {now_dt.strftime('%H:%M')}"
     matches_json = json.dumps(matches, ensure_ascii=False)
 
     # Vervang MATCHES en tijdstempel in template
