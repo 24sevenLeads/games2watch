@@ -89,6 +89,25 @@ TEAM_ALIASES = {
     # Primeira Liga
     'FC Porto':'F.C. Porto', 'SL Benfica':'S.L. Benfica',
     'Sporting CP':'Sporting Clube de Portugal',
+    # 2. Bundesliga (OpenLigaDB ShortName -> iservoetbalvanavond.nl)
+    'Schalke':       'FC Schalke 04',
+    'Paderborn':     'SC Paderborn 07',
+    'Elversberg':    'SV Elversberg',
+    'Hannover':      'Hannover 96',
+    'Darmstadt':     'SV Darmstadt 98',
+    'Hertha':        'Hertha BSC',
+    'Kaiserslautern':'1. FC Kaiserslautern',
+    'Karlsruhe':     'Karlsruher SC',
+    'Nürnberg':      '1. FC Nürnberg',
+    'Bochum':        'VfL Bochum',
+    'Kiel':          'Holstein Kiel',
+    'Dresden':       'SG Dynamo Dresden',
+    'Bielefeld':     'DSC Arminia Bielefeld',
+    'Düsseldorf':    'Fortuna Düsseldorf',
+    'Magdeburg':     '1. FC Magdeburg',
+    'Braunschweig':  'Eintracht Braunschweig',
+    'Fürth':         'SpVgg Greuther Fürth',
+    'Münster':       'SC Preußen Münster',
 }
 
 STANDINGS_IDS = {
