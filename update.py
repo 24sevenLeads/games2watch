@@ -303,6 +303,82 @@ def fetch_schedule():
     return matches
 
 
+# ── Hulpfuncties voor standen zonder API ────────────────────────────────────
+def fetch_kkd_standings():
+    """Haal KKD stand op via keukenkampioendivisie.nl klassement pagina."""
+    try:
+        html = fetch('https://keukenkampioendivisie.nl/klassement')
+        import json as _json
+        m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.S)
+        if not m:
+            return {}
+        data = _json.loads(m.group(1))
+        # Zoek standings in de JSON
+        def find_list(obj, depth=0):
+            if depth > 6: return []
+            if isinstance(obj, list) and len(obj) > 5:
+                # Check of het een standlijst is
+                if isinstance(obj[0], dict) and any(
+                    k in obj[0] for k in ['position','rank','pos','plaats']
+                ):
+                    return obj
+            if isinstance(obj, dict):
+                for v in obj.values():
+                    r = find_list(v, depth+1)
+                    if r: return r
+            elif isinstance(obj, list):
+                for item in obj:
+                    r = find_list(item, depth+1)
+                    if r: return r
+            return []
+
+        page_props = data.get('props', {}).get('pageProps', {})
+        rows = find_list(page_props)
+        teams = {}
+        for row in rows:
+            if not isinstance(row, dict): continue
+            pos = row.get('position') or row.get('rank') or row.get('pos')
+            team_obj = row.get('team') or row.get('club') or {}
+            name = (team_obj.get('name') or team_obj.get('shortName') or
+                    row.get('teamName') or row.get('name') or '')
+            if pos and name:
+                teams[name] = int(pos)
+        print(f"  -> kkd (KKD site): {len(teams)} teams")
+        return teams
+    except Exception as e:
+        print(f"  -> kkd fout: {e}")
+        return {}
+
+
+def fetch_bl2_standings():
+    """Haal 2.Bundesliga stand op via bundesliga.com."""
+    try:
+        html = fetch('https://www.bundesliga.com/en/2bundesliga/table')
+        # Zoek teamposities in de HTML tabel
+        teams = {}
+        rows = re.findall(r'<tr[^>]*>(.*?)</tr>', html, re.S)
+        for tr in rows:
+            pos_m = re.search(r'>\s*(\d+)\s*<', tr)
+            name_m = re.search(r'(?:alt|title)="([^"]{3,40})"', tr)
+            if pos_m and name_m:
+                pos  = int(pos_m.group(1))
+                name = name_m.group(1).strip()
+                if 1 <= pos <= 18 and name not in teams:
+                    teams[name] = pos
+        # Fallback: zoek in __NEXT_DATA__
+        if not teams:
+            m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.S)
+            if m:
+                import json as _json
+                data = _json.loads(m.group(1))
+                print(f"  -> bl2 NEXT_DATA keys: {list(data.get("props",{}).get("pageProps",{}).keys())[:5]}")
+        print(f"  -> bl2 (bundesliga.com): {len(teams)} teams")
+        return teams
+    except Exception as e:
+        print(f"  -> bl2 fout: {e}")
+        return {}
+
+
 # ── Stap 2: Standen via football-data.org ───────────────────────────────────
 def fetch_standings():
     print("Stap 2: Standen ophalen via football-data.org...")
@@ -322,7 +398,10 @@ def fetch_standings():
 
     for league_key, comp_id in STANDINGS_IDS.items():
         if comp_id is None:
-            print(f"  -> {league_key}: overgeslagen (niet in API)")
+            if league_key == 'kkd':
+                standings['kkd'] = fetch_kkd_standings()
+            elif league_key == 'bl2':
+                standings['bl2'] = fetch_bl2_standings()
             continue
         try:
             url = f"https://api.football-data.org/v4/competitions/{comp_id}/standings"
