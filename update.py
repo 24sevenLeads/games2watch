@@ -363,18 +363,20 @@ def fetch_kkd_standings():
         teams = {}
         for row in rows:
             if not isinstance(row, dict): continue
-            pos = (row.get('position') or row.get('rank') or
-                   row.get('standing') or row.get('pos'))
-            team_obj = row.get('team') or row.get('club') or {}
-            if isinstance(team_obj, dict):
-                name = (team_obj.get('name') or team_obj.get('shortName') or
-                        team_obj.get('displayName') or '')
-            else:
-                name = row.get('teamName') or row.get('name') or ''
+            pos  = row.get('rank') or row.get('position') or row.get('pos')
+            name = (row.get('contestantName') or row.get('contestantShortName') or
+                    row.get('contestantClubName') or '')
+            if not name:
+                team_obj = row.get('team') or row.get('club') or {}
+                if isinstance(team_obj, dict):
+                    name = team_obj.get('name') or team_obj.get('shortName') or ''
             if pos and name:
                 teams[name] = int(pos)
 
         print("  -> kkd (KKD site): " + str(len(teams)) + " teams")
+        if teams:
+            top = min(teams, key=teams.get)
+            print("  -> kkd #1: " + top)
         return teams
     except Exception as e:
         print("  -> kkd fout: " + str(e))
