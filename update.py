@@ -198,10 +198,16 @@ def fetch_standings():
     print("Stap 2: Standen ophalen via football-data.org...")
     standings = {}
 
+    # Probeer key uit environment, dan uit config/settings.json
     api_key = os.environ.get('FOOTBALL_DATA_API_KEY', '')
+    if not api_key:
+        settings_file = ROOT / 'config/settings.json'
+        if settings_file.exists():
+            settings = json.loads(settings_file.read_text())
+            api_key = settings.get('FOOTBALL_DATA_API_KEY', '')
     print(f"  API key aanwezig: {bool(api_key)}, lengte: {len(api_key)}")
     if not api_key:
-        print("  FOUT: FOOTBALL_DATA_API_KEY niet gevonden")
+        print("  FOUT: geen API key gevonden")
         return standings
 
     for league_key, comp_id in STANDINGS_IDS.items():
