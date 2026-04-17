@@ -41,6 +41,116 @@ SKIP_WORDS = ['youth','u19','u21','vrouwen','dames','women',
 
 JONG_TEAMS = {'Jong Ajax','Jong PSV','Jong AZ','Jong FC Utrecht','Jong Utrecht'}
 
+# Vertaling van football-data.org teamnamen → iservoetbalvanavond.nl teamnamen
+TEAM_ALIASES = {
+    # Premier League
+    'Arsenal FC':                    'Arsenal',
+    'Manchester City FC':            'Manchester City',
+    'Manchester United FC':          'Manchester United',
+    'Aston Villa FC':                'Aston Villa',
+    'Liverpool FC':                  'Liverpool',
+    'Chelsea FC':                    'Chelsea',
+    'Brentford FC':                  'Brentford',
+    'Everton FC':                    'Everton',
+    'Fulham FC':                     'Fulham',
+    'Brighton & Hove Albion FC':     'Brighton & Hove Albion',
+    'Newcastle United FC':           'Newcastle United',
+    'AFC Bournemouth':               'Bournemouth',
+    'Sunderland AFC':                'Sunderland',
+    'Nottingham Forest FC':          'Nottingham Forest',
+    'West Ham United FC':            'West Ham United',
+    'Leeds United FC':               'Leeds United',
+    'Crystal Palace FC':             'Crystal Palace',
+    'Tottenham Hotspur FC':          'Tottenham Hotspur',
+    'Burnley FC':                    'Burnley',
+    'Wolverhampton Wanderers FC':    'Wolverhampton Wanderers',
+    # Championship
+    'Coventry City FC':              'Coventry City',
+    'Ipswich Town FC':               'Ipswich Town',
+    'Middlesbrough FC':              'Middlesbrough',
+    'Millwall FC':                   'Millwall',
+    'Southampton FC':                'Southampton',
+    'Wrexham AFC':                   'Wrexham',
+    'Derby County FC':               'Derby County',
+    'Hull City AFC':                 'Hull City',
+    'Norwich City FC':               'Norwich City',
+    'Bristol City FC':               'Bristol City',
+    'Queens Park Rangers FC':        'Queens Park Rangers',
+    'Watford FC':                    'Watford',
+    'West Bromwich Albion FC':       'West Bromwich Albion',
+    'Charlton Athletic FC':          'Charlton Athletic',
+    'Stoke City FC':                 'Stoke City',
+    'Swansea City AFC':              'Swansea City',
+    'Preston North End FC':          'Preston North End',
+    'Birmingham City FC':            'Birmingham City',
+    'Leicester City FC':             'Leicester City',
+    'Blackburn Rovers FC':           'Blackburn Rovers',
+    'Portsmouth FC':                 'Portsmouth',
+    'Oxford United FC':              'Oxford United',
+    'Sheffield United FC':           'Sheffield United',
+    'Sheffield Wednesday FC':        'Sheffield Wednesday',
+    # Eredivisie
+    'PSV Eindhoven':                 'PSV',
+    'AFC Ajax':                      'Ajax',
+    'Feyenoord Rotterdam':           'Feyenoord',
+    'AZ Alkmaar':                    'AZ',
+    'FC Twente':                     'FC Twente',
+    'FC Utrecht':                    'FC Utrecht',
+    'Sparta Rotterdam':              'Sparta Rotterdam',
+    # Bundesliga
+    'FC Bayern München':             'Bayern München',
+    'Borussia Dortmund':             'Borussia Dortmund',
+    'VfB Stuttgart':                 'VfB Stuttgart',
+    'RB Leipzig':                    'RB Leipzig',
+    'Bayer 04 Leverkusen':           'Bayer 04 Leverkusen',
+    'TSG 1899 Hoffenheim':           'TSG 1899 Hoffenheim',
+    'Eintracht Frankfurt':           'Eintracht Frankfurt',
+    'SC Freiburg':                   'SC Freiburg',
+    '1. FSV Mainz 05':               '1. FSV Mainz 05',
+    'FC Augsburg':                   'FC Augsburg',
+    '1. FC Union Berlin':            '1. FC Union Berlin',
+    'Hamburger SV':                  'Hamburger SV',
+    '1. FC Köln':                    '1. FC Köln',
+    'Borussia Mönchengladbach':      'Borussia Mönchengladbach',
+    'SV Werder Bremen':              'SV Werder Bremen',
+    'FC St. Pauli':                  'FC St. Pauli',
+    'VfL Wolfsburg':                 'VfL Wolfsburg',
+    '1. FC Heidenheim 1846':         '1. FC Heidenheim',
+    # Serie A
+    'FC Internazionale Milano':      'Inter Milan',
+    'SSC Napoli':                    'Napoli',
+    'AC Milan':                      'AC Milan',
+    'Atalanta BC':                   'Atalanta',
+    'Juventus FC':                   'Juventus',
+    'SS Lazio':                      'Lazio',
+    'AS Roma':                       'Roma',
+    'Bologna FC 1909':               'Bologna F.C. 1909',
+    'Hellas Verona FC':              'Verona',
+    'Cagliari Calcio':               'Cagliari',
+    # La Liga
+    'FC Barcelona':                  'FC Barcelona',
+    'Real Madrid CF':                'Real Madrid C.F.',
+    'Club Atlético de Madrid':       'Atlético Madrid',
+    'Athletic Club':                 'Athletic Club',
+    'Real Sociedad de Fútbol':       'Real Sociedad',
+    'Villarreal CF':                 'Villarreal',
+    'Real Betis Balompié':           'Real Betis',
+    # Ligue 1
+    'Paris Saint-Germain FC':        'Paris Saint-Germain F.C.',
+    'Olympique de Marseille':        'Olympique de Marseille',
+    'Lille OSC':                     'Lille OSC',
+    'AS Monaco FC':                  'AS Monaco',
+    'Olympique Lyonnais':            'Olympique Lyonnais',
+    'RC Lens':                       'Lens',
+    'Stade Rennais FC 1901':         'Stade Rennais F.C.',
+    'FC Lorient':                    'FC Lorient',
+    'Toulouse FC':                   'Toulouse FC',
+    # Primeira Liga
+    'FC Porto':                      'F.C. Porto',
+    'SL Benfica':                    'S.L. Benfica',
+    'Sporting CP':                   'Sporting Clube de Portugal',
+}
+
 # football-data.org competition IDs
 STANDINGS_IDS = {
     'pl':           2021,  # Premier League
@@ -233,6 +343,13 @@ def fetch_standings():
                     team = row.get('team', {}).get('name', '')
                     if pos and team and team not in teams:
                         teams[team] = pos
+
+            # Pas aliases toe: football-data naam → iservoetbalvanavond naam
+            aliased = {}
+            for name, pos in teams.items():
+                canonical = TEAM_ALIASES.get(name, name)
+                aliased[canonical] = pos
+            teams = aliased
 
             if teams:
                 top = min(teams, key=teams.get)
