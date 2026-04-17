@@ -97,11 +97,17 @@ def fetch_schedule():
     page_props = data.get('props', {}).get('pageProps', {})
 
     # broadcastsResponse bevat de wedstrijden
-    broadcasts = page_props.get('broadcastsResponse', {})
-    print(f"  broadcastsResponse keys: {list(broadcasts.keys())[:10]}")
+    broadcasts = page_props.get('broadcastsResponse', [])
+    print(f"  broadcastsResponse type: {type(broadcasts).__name__}, len: {len(broadcasts) if isinstance(broadcasts, list) else 'n/a'}")
 
-    # Dump volledige structuur voor debugging
-    print(f"  DUMP broadcastsResponse: {json.dumps(broadcasts)[:500]}")
+    # Dump eerste item voor debugging
+    if isinstance(broadcasts, list) and broadcasts:
+        print(f"  DUMP item[0]: {json.dumps(broadcasts[0])[:800]}")
+    elif isinstance(broadcasts, dict):
+        print(f"  DUMP dict keys: {list(broadcasts.keys())[:10]}")
+        first_val = next(iter(broadcasts.values()), None)
+        if first_val:
+            print(f"  DUMP first_val[0]: {json.dumps(first_val[0] if isinstance(first_val, list) else first_val)[:800]}")
 
     return []
 
