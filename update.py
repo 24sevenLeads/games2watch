@@ -116,6 +116,16 @@ TEAM_ALIASES = {
     'FC St. Pauli':                  'FC St. Pauli',
     'VfL Wolfsburg':                 'VfL Wolfsburg',
     '1. FC Heidenheim 1846':         '1. FC Heidenheim',
+    'Bayer Leverkusen':              'Bayer 04 Leverkusen',
+    'Hoffenheim':                    'TSG 1899 Hoffenheim',
+    'Mainz 05':                      '1. FSV Mainz 05',
+    'Union Berlin':                  '1. FC Union Berlin',
+    'Köln':                          '1. FC Köln',
+    'Freiburg':                      'SC Freiburg',
+    'Wolfsburg':                     'VfL Wolfsburg',
+    'Heidenheim':                    '1. FC Heidenheim',
+    'Werder Bremen':                 'SV Werder Bremen',
+    'Mönchengladbach':               'Borussia Mönchengladbach',
     # Serie A
     'FC Internazionale Milano':      'Inter Milan',
     'SSC Napoli':                    'Napoli',
@@ -149,6 +159,18 @@ TEAM_ALIASES = {
     'FC Porto':                      'F.C. Porto',
     'SL Benfica':                    'S.L. Benfica',
     'Sporting CP':                   'Sporting Clube de Portugal',
+    # KKD (contestantName van keukenkampioendivisie.nl)
+    'ADO Den Haag':                  'ADO Den Haag',
+    'SC Cambuur':                    'SC Cambuur',
+    'De Graafschap':                 'De Graafschap',
+    'Willem II':                     'Willem II',
+    'Almere City FC':                'Almere City FC',
+    'RKC Waalwijk':                  'RKC Waalwijk',
+    'Roda JC Kerkrade':              'Roda JC Kerkrade',
+    'FC Den Bosch':                  'FC Den Bosch',
+    'Vitesse':                       'Vitesse',
+    'TOP Oss':                       'TOP Oss',
+    'MVV Maastricht':                'MVV Maastricht',
     # 2. Bundesliga (bundesliga.com namen)
     'Schalke':                       'FC Schalke 04',
     'Paderborn':                     'SC Paderborn 07',
@@ -384,35 +406,67 @@ def fetch_kkd_standings():
 
 
 def fetch_bl2_standings():
-    """Haal 2.Bundesliga stand op via bundesliga.com."""
+    """Haal 2.Bundesliga stand op via bundesliga.com __NEXT_DATA__."""
     try:
         html = fetch('https://www.bundesliga.com/en/2bundesliga/table')
-        # Zoek teamposities in de HTML tabel
+        import json as _json
+
+        m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.S)
+        if not m:
+            print("  -> bl2: geen __NEXT_DATA__")
+            return {}
+
+        data = _json.loads(m.group(1))
+
+        def find_standings(obj, depth=0):
+            if depth > 8: return []
+            if isinstance(obj, list) and len(obj) >= 5:
+                first = obj[0] if obj else {}
+                if isinstance(first, dict) and any(
+                    k in first for k in ['position','rank','clubName','shortName','abbreviation']
+                ):
+                    return obj
+            if isinstance(obj, dict):
+                for v in obj.values():
+                    r = find_standings(v, depth+1)
+                    if r: return r
+            elif isinstance(obj, list):
+                for item in obj:
+                    r = find_standings(item, depth+1)
+                    if r: return r
+            return []
+
+        page_props = data.get('props', {}).get('pageProps', {})
+        rows = find_standings(page_props)
+
+        if rows:
+            print("  -> bl2 row[0] keys: " + str(list(rows[0].keys())[:10]))
+
         teams = {}
-        rows = re.findall(r'<tr[^>]*>(.*?)</tr>', html, re.S)
-        for tr in rows:
-            pos_m = re.search(r'>\s*(\d+)\s*<', tr)
-            name_m = re.search(r'(?:alt|title)="([^"]{3,40})"', tr)
-            if pos_m and name_m:
-                pos  = int(pos_m.group(1))
-                name = name_m.group(1).strip()
-                if 1 <= pos <= 18 and name not in teams:
-                    teams[name] = pos
-        # Fallback: zoek in __NEXT_DATA__
-        if not teams:
-            m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.S)
-            if m:
-                import json as _json
-                data = _json.loads(m.group(1))
-                print("  -> bl2 NEXT_DATA keys: " + str(list(data.get("props",{}).get("pageProps",{}).keys())[:5]))
-        print(f"  -> bl2 (bundesliga.com): {len(teams)} teams")
+        for row in rows:
+            if not isinstance(row, dict): continue
+            pos  = row.get('position') or row.get('rank')
+            name = (row.get('clubName') or row.get('shortName') or
+                    row.get('abbreviation') or row.get('name') or '')
+            if not name:
+                club = row.get('club') or row.get('team') or {}
+                if isinstance(club, dict):
+                    name = club.get('name') or club.get('shortName') or ''
+            if pos and name:
+                teams[name] = int(pos)
+
+        if teams:
+            top = min(teams, key=teams.get)
+            print("  -> bl2: " + str(len(teams)) + " teams (#1: " + top + ")")
+        else:
+            sample = _json.dumps(rows[0])[:300] if rows else "geen rows"
+            print("  -> bl2: 0 teams, row[0]: " + sample)
         return teams
     except Exception as e:
-        print(f"  -> bl2 fout: {e}")
+        print("  -> bl2 fout: " + str(e))
         return {}
 
 
-# ── Stap 2: Standen via football-data.org ───────────────────────────────────
 def fetch_standings():
     print("Stap 2: Standen ophalen via football-data.org...")
     standings = {}
