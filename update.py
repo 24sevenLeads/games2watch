@@ -202,31 +202,41 @@ def fetch_standings():
             html = fetch(url)
             teams = {}
 
-            # Wikipedia raw HTML: zoek alle tr-blokken met positie en teamnaam
-            tr_blocks = re.findall(r'<tr[^>]*>(.*?)</tr>', html, re.S)
+            # Sla de infobox over: zoek de eerste wikitable na de infobox
+            # Infobox eindigt voor de eerste "wikitable sortable" tabel
+            table_m = re.search(
+                r'<table[^>]*class="[^"]*wikitable[^"]*sortable[^"]*"[^>]*>(.*?)</table>',
+                html, re.S)
+            if not table_m:
+                # Fallback: eerste wikitable
+                table_m = re.search(
+                    r'<table[^>]*class="[^"]*wikitable[^"]*"[^>]*>(.*?)</table>',
+                    html, re.S)
+            if not table_m:
+                print(f"  -> {league_key}: geen wikitable gevonden")
+                continue
+
+            table_html = table_m.group(1)
+            tr_blocks = re.findall(r'<tr[^>]*>(.*?)</tr>', table_html, re.S)
 
             for tr in tr_blocks:
-                # Positie
-                pos_m = re.search(r'scope="row"[^>]*>\s*(\d+)\s*<', tr)
+                if 'infobox' in tr:
+                    continue
+                # Positienummer in th scope=row
+                pos_m = re.search(r'<th[^>]+scope="row"[^>]*>\s*(\d+)\s*<', tr)
                 if not pos_m:
                     continue
                 pos = int(pos_m.group(1))
                 if pos > 24:
                     break
 
-                # Teamnaam: zoek <a> link met /wiki/ die NIET naar een persoon/stad linkt
-                # Wikipedia teamlinks hebben title="Clubnaam F.C." of gewoon "Clubnaam"
-                links = re.findall(r'href="/wiki/([^"#]+)"[^>]*title="([^"]+)"', tr)
-                for href, title in links:
+                # Teamnaam: eerste td met een wiki-link
+                td_links = re.findall(
+                    r'<td[^>]*>.*?<a[^>]+href="/wiki/[^"#]+"[^>]+title="([^"]+)"',
+                    tr, re.S)
+                for title in td_links:
                     title = title.strip()
-                    # Skip: disambiguation, personen, steden etc.
-                    # Teamlinks hebben meestal geen haakjes in title
-                    if '(' in title:
-                        # Verwijder "(association football)" etc
-                        clean = re.sub(r'\s*\([^)]+\)', '', title).strip()
-                    else:
-                        clean = title
-                    # Skip lege, te korte, of cijfer-achtige titels
+                    clean = re.sub(r'\s*\([^)]+\)\s*$', '', title).strip()
                     if clean and len(clean) > 2 and not clean.isdigit():
                         if clean not in teams:
                             teams[clean] = pos
@@ -235,13 +245,11 @@ def fetch_standings():
             if teams:
                 top = min(teams, key=teams.get)
                 standings[league_key] = teams
-                print(f"  → {league_key}: {len(teams)} teams (#1: {top})")
+                print(f"  -> {league_key}: {len(teams)} teams (#1: {top})")
             else:
-                # Debug: toon eerste tr met scope=row
-                sample = next((t for t in tr_blocks if 'scope="row"' in t), '')
-                print(f"  → {league_key}: geen teams — sample: {sample[:200]}")
+                print(f"  -> {league_key}: geen teams gevonden")
         except Exception as e:
-            print(f"  → {league_key}: fout ({e})")
+            print(f"  -> {league_key}: fout ({e})")
 
     return standings
 
