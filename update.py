@@ -13,6 +13,7 @@ CONFIG_CHANNELS = json.loads((ROOT / 'config/channels.json').read_text())
 TEMPLATE        = (ROOT / 'nl/index.html').read_text()
 DRY_RUN         = '--dry-run' in sys.argv
 
+# ── Competitie mapping ───────────────────────────────────────────────────────
 COMP_MAP = {
     'Champions League':             ('cl',           '🏆', 'Champions League'),
     'Europa League':                ('el',           '🏆', 'Europa League'),
@@ -41,176 +42,97 @@ SKIP_WORDS = ['youth','u19','u21','vrouwen','dames','women',
 
 JONG_TEAMS = {'Jong Ajax','Jong PSV','Jong AZ','Jong FC Utrecht','Jong Utrecht'}
 
-# Vertaling van football-data.org teamnamen → iservoetbalvanavond.nl teamnamen
+# ── Teamnaam aliases: football-data.org / Wikipedia → iservoetbalvanavond ───
 TEAM_ALIASES = {
     # Premier League
-    'Arsenal FC':                    'Arsenal',
-    'Manchester City FC':            'Manchester City',
-    'Manchester United FC':          'Manchester United',
-    'Aston Villa FC':                'Aston Villa',
-    'Liverpool FC':                  'Liverpool',
-    'Chelsea FC':                    'Chelsea',
-    'Brentford FC':                  'Brentford',
-    'Everton FC':                    'Everton',
-    'Fulham FC':                     'Fulham',
-    'Brighton & Hove Albion FC':     'Brighton & Hove Albion',
-    'Newcastle United FC':           'Newcastle United',
-    'AFC Bournemouth':               'Bournemouth',
-    'Sunderland AFC':                'Sunderland',
-    'Nottingham Forest FC':          'Nottingham Forest',
-    'West Ham United FC':            'West Ham United',
-    'Leeds United FC':               'Leeds United',
-    'Crystal Palace FC':             'Crystal Palace',
-    'Tottenham Hotspur FC':          'Tottenham Hotspur',
-    'Burnley FC':                    'Burnley',
-    'Wolverhampton Wanderers FC':    'Wolverhampton Wanderers',
+    'Arsenal FC':'Arsenal', 'Manchester City FC':'Manchester City',
+    'Manchester United FC':'Manchester United', 'Aston Villa FC':'Aston Villa',
+    'Liverpool FC':'Liverpool', 'Chelsea FC':'Chelsea',
+    'Brentford FC':'Brentford', 'Everton FC':'Everton', 'Fulham FC':'Fulham',
+    'Brighton & Hove Albion FC':'Brighton & Hove Albion',
+    'Newcastle United FC':'Newcastle United', 'AFC Bournemouth':'Bournemouth',
+    'Sunderland AFC':'Sunderland', 'Nottingham Forest FC':'Nottingham Forest',
+    'West Ham United FC':'West Ham United', 'Leeds United FC':'Leeds United',
+    'Crystal Palace FC':'Crystal Palace', 'Tottenham Hotspur FC':'Tottenham Hotspur',
+    'Burnley FC':'Burnley', 'Wolverhampton Wanderers FC':'Wolverhampton Wanderers',
     # Championship
-    'Coventry City FC':              'Coventry City',
-    'Ipswich Town FC':               'Ipswich Town',
-    'Middlesbrough FC':              'Middlesbrough',
-    'Millwall FC':                   'Millwall',
-    'Southampton FC':                'Southampton',
-    'Wrexham AFC':                   'Wrexham',
-    'Derby County FC':               'Derby County',
-    'Hull City AFC':                 'Hull City',
-    'Norwich City FC':               'Norwich City',
-    'Bristol City FC':               'Bristol City',
-    'Queens Park Rangers FC':        'Queens Park Rangers',
-    'Watford FC':                    'Watford',
-    'West Bromwich Albion FC':       'West Bromwich Albion',
-    'Charlton Athletic FC':          'Charlton Athletic',
-    'Stoke City FC':                 'Stoke City',
-    'Swansea City AFC':              'Swansea City',
-    'Preston North End FC':          'Preston North End',
-    'Birmingham City FC':            'Birmingham City',
-    'Leicester City FC':             'Leicester City',
-    'Blackburn Rovers FC':           'Blackburn Rovers',
-    'Portsmouth FC':                 'Portsmouth',
-    'Oxford United FC':              'Oxford United',
-    'Sheffield United FC':           'Sheffield United',
-    'Sheffield Wednesday FC':        'Sheffield Wednesday',
+    'Coventry City FC':'Coventry City', 'Ipswich Town FC':'Ipswich Town',
+    'Middlesbrough FC':'Middlesbrough', 'Millwall FC':'Millwall',
+    'Southampton FC':'Southampton', 'Wrexham AFC':'Wrexham',
+    'Derby County FC':'Derby County', 'Hull City AFC':'Hull City',
+    'Norwich City FC':'Norwich City', 'Bristol City FC':'Bristol City',
+    'Queens Park Rangers FC':'Queens Park Rangers', 'Watford FC':'Watford',
+    'West Bromwich Albion FC':'West Bromwich Albion',
+    'Charlton Athletic FC':'Charlton Athletic', 'Stoke City FC':'Stoke City',
+    'Swansea City AFC':'Swansea City', 'Preston North End FC':'Preston North End',
+    'Birmingham City FC':'Birmingham City', 'Leicester City FC':'Leicester City',
+    'Blackburn Rovers FC':'Blackburn Rovers', 'Portsmouth FC':'Portsmouth',
+    'Oxford United FC':'Oxford United', 'Sheffield United FC':'Sheffield United',
+    'Sheffield Wednesday FC':'Sheffield Wednesday',
     # Eredivisie
-    'PSV Eindhoven':                 'PSV',
-    'AFC Ajax':                      'Ajax',
-    'Feyenoord Rotterdam':           'Feyenoord',
-    'AZ Alkmaar':                    'AZ',
-    'FC Twente':                     'FC Twente',
-    'FC Utrecht':                    'FC Utrecht',
-    'Sparta Rotterdam':              'Sparta Rotterdam',
+    'PSV Eindhoven':'PSV', 'AFC Ajax':'Ajax', 'Feyenoord Rotterdam':'Feyenoord',
+    'AZ Alkmaar':'AZ',
     # Bundesliga
-    'FC Bayern München':             'Bayern München',
-    'Borussia Dortmund':             'Borussia Dortmund',
-    'VfB Stuttgart':                 'VfB Stuttgart',
-    'RB Leipzig':                    'RB Leipzig',
-    'Bayer 04 Leverkusen':           'Bayer 04 Leverkusen',
-    'TSG 1899 Hoffenheim':           'TSG 1899 Hoffenheim',
-    'Eintracht Frankfurt':           'Eintracht Frankfurt',
-    'SC Freiburg':                   'SC Freiburg',
-    '1. FSV Mainz 05':               '1. FSV Mainz 05',
-    'FC Augsburg':                   'FC Augsburg',
-    '1. FC Union Berlin':            '1. FC Union Berlin',
-    'Hamburger SV':                  'Hamburger SV',
-    '1. FC Köln':                    '1. FC Köln',
-    'Borussia Mönchengladbach':      'Borussia Mönchengladbach',
-    'SV Werder Bremen':              'SV Werder Bremen',
-    'FC St. Pauli':                  'FC St. Pauli',
-    'VfL Wolfsburg':                 'VfL Wolfsburg',
-    '1. FC Heidenheim 1846':         '1. FC Heidenheim',
-    'Bayer Leverkusen':              'Bayer 04 Leverkusen',
-    'Hoffenheim':                    'TSG 1899 Hoffenheim',
-    'Mainz 05':                      '1. FSV Mainz 05',
-    'Union Berlin':                  '1. FC Union Berlin',
-    'Köln':                          '1. FC Köln',
-    'Freiburg':                      'SC Freiburg',
-    'Wolfsburg':                     'VfL Wolfsburg',
-    'Heidenheim':                    '1. FC Heidenheim',
-    'Werder Bremen':                 'SV Werder Bremen',
-    'Mönchengladbach':               'Borussia Mönchengladbach',
+    'FC Bayern München':'Bayern München', 'Bayer Leverkusen':'Bayer 04 Leverkusen',
+    'Bayer 04 Leverkusen':'Bayer 04 Leverkusen',
+    'TSG Hoffenheim':'TSG 1899 Hoffenheim', 'TSG 1899 Hoffenheim':'TSG 1899 Hoffenheim',
+    'Eintracht Frankfurt':'Eintracht Frankfurt', 'SC Freiburg':'SC Freiburg',
+    'FSV Mainz 05':'1. FSV Mainz 05', '1. FSV Mainz 05':'1. FSV Mainz 05',
+    'FC Augsburg':'FC Augsburg', '1. FC Union Berlin':'1. FC Union Berlin',
+    'Hamburger SV':'Hamburger SV', '1. FC Köln':'1. FC Köln',
+    'Borussia Mönchengladbach':'Borussia Mönchengladbach',
+    'SV Werder Bremen':'SV Werder Bremen', 'FC St. Pauli':'FC St. Pauli',
+    'VfL Wolfsburg':'VfL Wolfsburg', '1. FC Heidenheim 1846':'1. FC Heidenheim',
+    # 2. Bundesliga (Wikipedia namen)
+    'FC Schalke 04':'FC Schalke 04', 'SC Paderborn 07':'SC Paderborn 07',
+    'Hannover 96':'Hannover 96', 'SV Elversberg':'SV Elversberg',
+    'SV Darmstadt 98':'SV Darmstadt 98', 'Hertha BSC':'Hertha BSC',
+    '1. FC Kaiserslautern':'1. FC Kaiserslautern', 'Karlsruher SC':'Karlsruher SC',
+    '1. FC Nürnberg':'1. FC Nürnberg', 'VfL Bochum':'VfL Bochum',
+    'SG Dynamo Dresden':'SG Dynamo Dresden', 'Holstein Kiel':'Holstein Kiel',
+    'DSC Arminia Bielefeld':'DSC Arminia Bielefeld', 'FC Magdeburg':'FC Magdeburg',
+    'SpVgg Greuther Fürth':'SpVgg Greuther Fürth',
+    'Eintracht Braunschweig':'Eintracht Braunschweig',
+    'SC Preußen Münster':'SC Preußen Münster', 'Fortuna Düsseldorf':'Fortuna Düsseldorf',
     # Serie A
-    'FC Internazionale Milano':      'Inter Milan',
-    'SSC Napoli':                    'Napoli',
-    'AC Milan':                      'AC Milan',
-    'Atalanta BC':                   'Atalanta',
-    'Juventus FC':                   'Juventus',
-    'SS Lazio':                      'Lazio',
-    'AS Roma':                       'Roma',
-    'Bologna FC 1909':               'Bologna F.C. 1909',
-    'Hellas Verona FC':              'Verona',
-    'Cagliari Calcio':               'Cagliari',
+    'FC Internazionale Milano':'Inter Milan', 'SSC Napoli':'Napoli',
+    'AC Milan':'AC Milan', 'Atalanta BC':'Atalanta', 'Juventus FC':'Juventus',
+    'SS Lazio':'Lazio', 'AS Roma':'Roma', 'Bologna FC 1909':'Bologna F.C. 1909',
+    'Hellas Verona FC':'Verona', 'Cagliari Calcio':'Cagliari',
     # La Liga
-    'FC Barcelona':                  'FC Barcelona',
-    'Real Madrid CF':                'Real Madrid C.F.',
-    'Club Atlético de Madrid':       'Atlético Madrid',
-    'Athletic Club':                 'Athletic Club',
-    'Real Sociedad de Fútbol':       'Real Sociedad',
-    'Villarreal CF':                 'Villarreal',
-    'Real Betis Balompié':           'Real Betis',
+    'FC Barcelona':'FC Barcelona', 'Real Madrid CF':'Real Madrid C.F.',
+    'Club Atlético de Madrid':'Atlético Madrid',
+    'Real Betis Balompié':'Real Betis', 'Real Sociedad de Fútbol':'Real Sociedad',
     # Ligue 1
-    'Paris Saint-Germain FC':        'Paris Saint-Germain F.C.',
-    'Olympique de Marseille':        'Olympique de Marseille',
-    'Lille OSC':                     'Lille OSC',
-    'AS Monaco FC':                  'AS Monaco',
-    'Olympique Lyonnais':            'Olympique Lyonnais',
-    'RC Lens':                       'Lens',
-    'Stade Rennais FC 1901':         'Stade Rennais F.C.',
-    'FC Lorient':                    'FC Lorient',
-    'Toulouse FC':                   'Toulouse FC',
+    'Paris Saint-Germain FC':'Paris Saint-Germain F.C.',
+    'Olympique de Marseille':'Olympique de Marseille', 'Lille OSC':'Lille OSC',
+    'AS Monaco FC':'AS Monaco', 'Olympique Lyonnais':'Olympique Lyonnais',
+    'RC Lens':'Lens', 'Stade Rennais FC 1901':'Stade Rennais F.C.',
+    'FC Lorient':'FC Lorient', 'Toulouse FC':'Toulouse FC',
     # Primeira Liga
-    'FC Porto':                      'F.C. Porto',
-    'SL Benfica':                    'S.L. Benfica',
-    'Sporting CP':                   'Sporting Clube de Portugal',
-    # KKD (contestantName van keukenkampioendivisie.nl)
-    'ADO Den Haag':                  'ADO Den Haag',
-    'SC Cambuur':                    'SC Cambuur',
-    'De Graafschap':                 'De Graafschap',
-    'Willem II':                     'Willem II',
-    'Almere City FC':                'Almere City FC',
-    'RKC Waalwijk':                  'RKC Waalwijk',
-    'Roda JC Kerkrade':              'Roda JC Kerkrade',
-    'FC Den Bosch':                  'FC Den Bosch',
-    'Vitesse':                       'Vitesse',
-    'TOP Oss':                       'TOP Oss',
-    'MVV Maastricht':                'MVV Maastricht',
-    # 2. Bundesliga (bundesliga.com namen)
-    'Schalke':                       'FC Schalke 04',
-    'Paderborn':                     'SC Paderborn 07',
-    'Hannover':                      'Hannover 96',
-    'Elversberg':                    'SV Elversberg',
-    'Darmstadt':                     'SV Darmstadt 98',
-    'Hertha Berlin':                 'Hertha BSC',
-    'Kaiserslautern':                '1. FC Kaiserslautern',
-    'Karlsruhe':                     'Karlsruher SC',
-    'Nuremberg':                     '1. FC Nürnberg',
-    'Bochum':                        'VfL Bochum',
-    'Dynamo Dresden':                'SG Dynamo Dresden',
-    'Holstein Kiel':                 'Holstein Kiel',
-    'Arminia Bielefeld':             'DSC Arminia Bielefeld',
-    'Magdeburg':                     'FC Magdeburg',
-    'Greuther Fürth':                'SpVgg Greuther Fürth',
-    'Braunschweig':                  'Eintracht Braunschweig',
-    'Preußen Münster':               'SC Preußen Münster',
-    'Fortuna Düsseldorf':            'Fortuna Düsseldorf',
+    'FC Porto':'F.C. Porto', 'SL Benfica':'S.L. Benfica',
+    'Sporting CP':'Sporting Clube de Portugal',
 }
 
 # football-data.org competition IDs
 STANDINGS_IDS = {
-    'pl':           2021,  # Premier League
-    'champ':        2016,  # Championship
-    'ed':           2003,  # Eredivisie
-    'kkd':          None,  # KKD niet beschikbaar in gratis tier
-    'bl':           2002,  # Bundesliga
-    'bl2':          None,  # 2.Bundesliga niet in gratis tier
-    'sa':           2019,  # Serie A
-    'll':           2014,  # La Liga
-    'l1':           2015,  # Ligue 1
-    'primeiraliga': 2017,  # Primeira Liga
+    'pl':           2021,
+    'champ':        2016,
+    'ed':           2003,
+    'bl':           2002,
+    'sa':           2019,
+    'll':           2014,
+    'l1':           2015,
+    'primeiraliga': 2017,
+    'kkd':          None,  # via keukenkampioendivisie.nl
+    'bl2':          None,  # via Wikipedia
 }
 
 
 def fetch(url):
     req = Request(url, headers={
         'User-Agent': 'Mozilla/5.0 (compatible; games2watch/1.0)',
-        'Accept': 'text/html,application/xhtml+xml',
+        'Accept': 'text/html,application/xhtml+xml,application/json',
     })
     with urlopen(req, timeout=20) as r:
         return r.read().decode('utf-8', errors='replace')
@@ -223,7 +145,7 @@ def day_label(d):
 
 
 def channel_info(raw):
-    if not raw:
+    if not raw or not isinstance(raw, str):
         return {'cls': 'other', 'free': False, 'label': '?'}
     ch = CONFIG_CHANNELS['channels']
     if raw in ch: return ch[raw]
@@ -245,63 +167,53 @@ def fetch_schedule():
         print("  FOUT: __NEXT_DATA__ niet gevonden")
         return []
 
-    data = json.loads(m.group(1))
-    page_props = data.get('props', {}).get('pageProps', {})
+    data     = json.loads(m.group(1))
+    pp       = data.get('props', {}).get('pageProps', {})
+    broadcasts = pp.get('broadcastsResponse', [])
 
-    # broadcastsResponse bevat de wedstrijden
-    broadcasts = page_props.get('broadcastsResponse', [])
-    today = datetime.date.today()
+    today   = datetime.date.today()
     matches = []
 
     for item in broadcasts:
-        # Datum + tijd
         dt_utc = item.get('datetimeUtc', '')
-        if not dt_utc:
-            continue
+        if not dt_utc: continue
         try:
-            dt = datetime.datetime.fromisoformat(dt_utc.replace('Z', '+00:00'))
-            # Omzet naar Nederlandse tijd (UTC+2 zomertijd)
+            dt    = datetime.datetime.fromisoformat(dt_utc.replace('Z', '+00:00'))
             dt_nl = dt + datetime.timedelta(hours=2)
             match_date = dt_nl.date()
-            time_str = dt_nl.strftime('%H:%M')
+            time_str   = dt_nl.strftime('%H:%M')
         except Exception:
             continue
 
-        # Alleen vandaag en later
         if match_date < today:
             continue
 
-        # Teamnamen
-        home_obj = item.get('homeTeam', {}) or {}
-        away_obj = item.get('awayTeam', {}) or {}
+        home_obj = item.get('homeTeam') or {}
+        away_obj = item.get('awayTeam') or {}
         home = home_obj.get('name', '')
         away = away_obj.get('name', '')
-        if not home or not away:
-            continue
+        if not home or not away: continue
 
-        # Competitie
-        comp_inst = item.get('competitionInstance', {}) or {}
-        comp_raw = comp_inst.get('name', '') or comp_inst.get('competition', {}).get('name', '') if isinstance(comp_inst, dict) else ''
-        # Probeer ook via competition key
+        # Competitienaam
+        ci = item.get('competitionInstance') or {}
+        comp_raw = ''
+        if isinstance(ci, dict):
+            comp_raw = ci.get('name', '') or (ci.get('competition') or {}).get('name', '')
         if not comp_raw:
-            comp_obj = item.get('competition', {}) or {}
-            comp_raw = comp_obj.get('name', '')
+            comp_raw = (item.get('competition') or {}).get('name', '')
 
-        if comp_raw not in COMP_MAP:
-            continue
-        if any(w in comp_raw.lower() for w in SKIP_WORDS):
-            continue
+        if comp_raw not in COMP_MAP: continue
+        if any(w in comp_raw.lower() for w in SKIP_WORDS): continue
 
         key, flag, comp_label = COMP_MAP[comp_raw]
 
-        # Kanalen: item.get('broadcasts') is een lijst van broadcast-objecten
-        # Kanaal: zit als {"channel": {"name": "Viaplay", ...}} in broadcasts lijst
-        broadcasts_list = item.get('broadcasts', []) or []
+        # Kanaal
+        bl = item.get('broadcasts') or []
         ch_raw = '?'
-        for b in broadcasts_list:
+        for b in bl:
             if not isinstance(b, dict): continue
             ch_obj = b.get('channel') or {}
-            name = ch_obj.get('name') or ch_obj.get('abbreviation') or ''
+            name = (ch_obj.get('name') or ch_obj.get('abbreviation') or '') if isinstance(ch_obj, dict) else ''
             if name:
                 ch_raw = name
                 break
@@ -309,24 +221,13 @@ def fetch_schedule():
         ch = channel_info(ch_raw)
 
         matches.append({
-            'sk':        f"{match_date} {time_str}",
-            'day':       day_label(match_date),
-            'date':      str(match_date),
-            'time':      time_str,
-            'comp':      comp_label,
-            'leagueKey': key,
-            'flag':      flag,
-            'home':      home,
-            'away':      away,
-            'rH':        None,
-            'rA':        None,
-            'stakeH':    'mid',
-            'stakeA':    'mid',
-            'tv': {
-                'label': ch.get('label', ch_raw),
-                'cls':   ch.get('cls', 'other'),
-                'free':  ch.get('free', False),
-            },
+            'sk': f"{match_date} {time_str}", 'day': day_label(match_date),
+            'date': str(match_date), 'time': time_str,
+            'comp': comp_label, 'leagueKey': key, 'flag': flag,
+            'home': home, 'away': away,
+            'rH': None, 'rA': None, 'stakeH': 'mid', 'stakeA': 'mid',
+            'tv': {'label': ch.get('label', ch_raw), 'cls': ch.get('cls', 'other'),
+                   'free': ch.get('free', False)},
             'legScore': None,
         })
 
@@ -334,151 +235,140 @@ def fetch_schedule():
     print(f"  → {len(matches)} wedstrijden gevonden")
     for m in matches[:3]:
         print(f"     {m['date']} {m['time']} {m['home']} - {m['away']} [{m['tv']['label']}]")
-
-    # Debug: print eerste raw item om competitie + kanaal structuur te zien
-    if broadcasts and len(matches) == 0:
-        sample = broadcasts[0]
-        print(f"  DEBUG comp keys: {list((sample.get('competitionInstance') or sample.get('competition') or {}).keys())}")
-        print(f"  DEBUG broadcast[0]: {json.dumps((sample.get('broadcasts') or [{}])[0])[:200]}")
-
     return matches
 
 
-# ── Hulpfuncties voor standen zonder API ────────────────────────────────────
-def fetch_kkd_standings():
-    """Haal KKD stand op via keukenkampioendivisie.nl klassement pagina."""
-    try:
-        html = fetch('https://keukenkampioendivisie.nl/klassement')
-        import json as _json
-        m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.S)
-        if not m:
-            print("  -> kkd: geen __NEXT_DATA__")
-            return {}
-        data = _json.loads(m.group(1))
-        page_props = data.get('props', {}).get('pageProps', {})
-        print("  -> kkd pageProps keys: " + str(list(page_props.keys())[:8]))
+# ── Wikipedia standings parser ───────────────────────────────────────────────
+def parse_wikipedia_standings(url, max_pos=24):
+    """Universele Wikipedia standentabel parser."""
+    html = fetch(url)
+    teams = {}
 
-        # Zoek recursief naar een lijst met position + team info
-        def find_standings(obj, depth=0):
-            if depth > 8: return []
-            if isinstance(obj, list) and len(obj) >= 5:
-                first = obj[0] if obj else {}
-                if isinstance(first, dict):
-                    keys = set(first.keys())
-                    if keys & {'position','rank','standing','teamId','team'}:
-                        return obj
-            if isinstance(obj, dict):
-                for v in obj.values():
-                    r = find_standings(v, depth+1)
-                    if r: return r
-            elif isinstance(obj, list):
-                for item in obj:
-                    r = find_standings(item, depth+1)
-                    if r: return r
-            return []
+    # Zoek ALLE wikitables, pak de eerste die posities 1-N bevat
+    tables = re.findall(r'<table[^>]*wikitable[^>]*>(.*?)</table>', html, re.S)
 
-        rows = find_standings(page_props)
-        print("  -> kkd rows gevonden: " + str(len(rows)))
-        if rows:
-            print("  -> kkd row[0] keys: " + str(list(rows[0].keys())[:8]))
-
-        teams = {}
-        for row in rows:
-            if not isinstance(row, dict): continue
-            pos  = row.get('rank') or row.get('position') or row.get('pos')
-            name = (row.get('contestantName') or row.get('contestantShortName') or
-                    row.get('contestantClubName') or '')
-            if not name:
-                team_obj = row.get('team') or row.get('club') or {}
-                if isinstance(team_obj, dict):
-                    name = team_obj.get('name') or team_obj.get('shortName') or ''
-            if pos and name:
-                teams[name] = int(pos)
-
-        print("  -> kkd (KKD site): " + str(len(teams)) + " teams")
-        if teams:
-            top = min(teams, key=teams.get)
-            print("  -> kkd #1: " + top)
-        return teams
-    except Exception as e:
-        print("  -> kkd fout: " + str(e))
-        return {}
-
-
-def fetch_bl2_standings():
-    """Haal 2.Bundesliga stand op via Wikipedia."""
-    try:
-        html = fetch('https://en.wikipedia.org/wiki/2025%E2%80%9326_2._Bundesliga')
-        teams = {}
-
-        # Zoek de wikitable sortable
-        table_m = re.search(
-            r'<table[^>]*wikitable[^>]*sortable[^>]*>(.*?)</table>',
-            html, re.S)
-        if not table_m:
-            table_m = re.search(r'<table[^>]*wikitable[^>]*>(.*?)</table>', html, re.S)
-        if not table_m:
-            print("  -> bl2: geen wikitable")
-            return {}
-
-        table_html = table_m.group(1)
-        tr_blocks = re.findall(r'<tr[^>]*>(.*?)</tr>', table_html, re.S)
-
-        for tr in tr_blocks:
-            if 'infobox' in tr:
-                continue
-            pos_m = re.search(r'<th[^>]+scope="row"[^>]*>\s*(\d+)\s*<', tr)
+    for table in tables:
+        found = {}
+        rows = re.findall(r'<tr[^>]*>(.*?)</tr>', table, re.S)
+        for tr in rows:
+            # Positienummer: <th scope="row">N</th>
+            pos_m = re.search(r'<th[^>]+scope=["\']row["\'][^>]*>\s*(\d+)\s*</th>', tr)
             if not pos_m:
                 continue
             pos = int(pos_m.group(1))
-            if pos > 18:
+            if pos > max_pos:
                 break
-            td_links = re.findall(
-                r'<td[^>]*>.*?<a[^>]+href="/wiki/[^"#]+"[^>]+title="([^"]+)"',
-                tr, re.S)
-            for title in td_links:
-                title = title.strip()
-                clean = re.sub(r'\s*\([^)]+\)\s*$', '', title).strip()
-                if clean and len(clean) > 2 and not clean.isdigit():
-                    if clean not in teams:
-                        teams[clean] = pos
-                    break
 
-        if teams:
-            top = min(teams, key=teams.get)
-            print("  -> bl2 (Wikipedia): " + str(len(teams)) + " teams (#1: " + top + ")")
-        else:
-            print("  -> bl2: geen teams gevonden")
-        return teams
-    except Exception as e:
-        print("  -> bl2 fout: " + str(e))
+            # Teamnaam: zoek eerste <a> link in een <td> cel
+            # Strip HTML tags om de tekst te krijgen
+            tds = re.findall(r'<td[^>]*>(.*?)</td>', tr, re.S)
+            for td in tds:
+                # Zoek link met title of gewoon tekst
+                link_m = re.search(r'title="([^"]+)"', td)
+                if link_m:
+                    name = link_m.group(1).strip()
+                    # Verwijder disambiguatie
+                    name = re.sub(r'\s*\([^)]+\)\s*$', '', name).strip()
+                    if name and len(name) > 2 and not name.isdigit():
+                        found[name] = pos
+                        break
+                else:
+                    # Tekst zonder link
+                    text = re.sub(r'<[^>]+>', '', td).strip()
+                    if text and len(text) > 2 and not text.isdigit():
+                        found[text] = pos
+                        break
+
+        # Accepteer tabel als die minstens 5 teams heeft
+        if len(found) >= 5:
+            teams = found
+            break
+
+    return teams
+
+
+# ── KKD standings ─────────────────────────────────────────────────────────────
+def fetch_kkd_standings():
+    html = fetch('https://keukenkampioendivisie.nl/klassement')
+    m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.S)
+    if not m:
         return {}
+    data = json.loads(m.group(1))
+    pp = data.get('props', {}).get('pageProps', {})
+
+    # rankingsData is de sleutel
+    rankings = pp.get('rankingsData', [])
+    if not rankings:
+        # Zoek recursief
+        def find_list(obj, depth=0):
+            if depth > 6: return []
+            if isinstance(obj, list) and len(obj) >= 5:
+                if isinstance(obj[0], dict) and 'rank' in obj[0]:
+                    return obj
+            if isinstance(obj, dict):
+                for v in obj.values():
+                    r = find_list(v, depth+1)
+                    if r: return r
+            elif isinstance(obj, list):
+                for item in obj:
+                    r = find_list(item, depth+1)
+                    if r: return r
+            return []
+        rankings = find_list(pp)
+
+    teams = {}
+    for row in rankings:
+        if not isinstance(row, dict): continue
+        pos  = row.get('rank') or row.get('position')
+        name = (row.get('contestantName') or row.get('contestantShortName') or
+                row.get('contestantClubName') or '')
+        if not name:
+            t = row.get('team') or row.get('club') or {}
+            name = (t.get('name') or t.get('shortName') or '') if isinstance(t, dict) else ''
+        if pos and name:
+            teams[name] = int(pos)
+
+    if teams:
+        print(f"  → kkd: {len(teams)} teams (#1: {min(teams, key=teams.get)})")
+    else:
+        print("  → kkd: geen teams gevonden")
+    return teams
 
 
+# ── Stap 2: Standen ─────────────────────────────────────────────────────────
 def fetch_standings():
-    print("Stap 2: Standen ophalen via football-data.org...")
+    print("Stap 2: Standen ophalen...")
     standings = {}
 
-    # Probeer key uit environment, dan uit config/settings.json
+    # API key
     api_key = os.environ.get('FOOTBALL_DATA_API_KEY', '')
     if not api_key:
-        settings_file = ROOT / 'config/settings.json'
-        if settings_file.exists():
-            settings = json.loads(settings_file.read_text())
-            api_key = settings.get('FOOTBALL_DATA_API_KEY', '')
-    print(f"  API key aanwezig: {bool(api_key)}, lengte: {len(api_key)}")
-    if not api_key:
-        print("  FOUT: geen API key gevonden")
-        return standings
+        sf = ROOT / 'config/settings.json'
+        if sf.exists():
+            api_key = json.loads(sf.read_text()).get('FOOTBALL_DATA_API_KEY', '')
+    print(f"  API key: {'OK' if api_key else 'ONTBREEKT'} ({len(api_key)} tekens)")
 
     for league_key, comp_id in STANDINGS_IDS.items():
-        if comp_id is None:
+        try:
             if league_key == 'kkd':
                 standings['kkd'] = fetch_kkd_standings()
-            elif league_key == 'bl2':
-                standings['bl2'] = fetch_bl2_standings()
-            continue
-        try:
+                continue
+
+            if league_key == 'bl2':
+                teams = parse_wikipedia_standings(
+                    'https://en.wikipedia.org/wiki/2025%E2%80%9326_2._Bundesliga', 18)
+                if teams:
+                    top = min(teams, key=teams.get)
+                    print(f"  → bl2 (Wikipedia): {len(teams)} teams (#1: {top})")
+                else:
+                    print("  → bl2: geen teams gevonden")
+                standings['bl2'] = teams
+                continue
+
+            if not api_key:
+                print(f"  → {league_key}: skip (geen API key)")
+                continue
+
             url = f"https://api.football-data.org/v4/competitions/{comp_id}/standings"
             req = Request(url, headers={
                 'X-Auth-Token': api_key,
@@ -488,57 +378,54 @@ def fetch_standings():
                 data = json.loads(r.read())
 
             teams = {}
-            # API geeft standings als lijst van tabellen (TOTAL, HOME, AWAY)
             for table in data.get('standings', []):
-                if table.get('type') != 'TOTAL':
-                    continue
+                if table.get('type') != 'TOTAL': continue
                 for row in table.get('table', []):
                     pos  = row.get('position')
-                    team = row.get('team', {}).get('name', '')
-                    if pos and team and team not in teams:
-                        teams[team] = pos
+                    name = row.get('team', {}).get('name', '')
+                    if pos and name and name not in teams:
+                        teams[name] = pos
 
-            # Pas aliases toe: football-data naam → iservoetbalvanavond naam
-            aliased = {}
-            for name, pos in teams.items():
-                canonical = TEAM_ALIASES.get(name, name)
-                aliased[canonical] = pos
-            teams = aliased
+            # Aliases toepassen
+            teams = {TEAM_ALIASES.get(k, k): v for k, v in teams.items()}
 
             if teams:
-                top = min(teams, key=teams.get)
-                standings[league_key] = teams
-                print(f"  -> {league_key}: {len(teams)} teams (#1: {top})")
+                print(f"  → {league_key}: {len(teams)} teams (#1: {min(teams, key=teams.get)})")
             else:
-                print(f"  -> {league_key}: geen teams gevonden")
+                print(f"  → {league_key}: geen teams")
+            standings[league_key] = teams
+
         except Exception as e:
-            print(f"  -> {league_key}: fout ({e})")
+            print(f"  → {league_key}: fout ({e})")
+
+    # Pas Wikipedia aliases toe op bl2
+    if 'bl2' in standings:
+        standings['bl2'] = {TEAM_ALIASES.get(k, k): v for k, v in standings['bl2'].items()}
 
     return standings
 
 
-# ── Stap 3-4 ongewijzigd ────────────────────────────────────────────────────
+# ── Stap 3: Tags ─────────────────────────────────────────────────────────────
 def apply_tags(matches, standings):
     print("Stap 3: Tags toepassen...")
     for m in matches:
-        key         = m['leagueKey']
-        league_tags = CONFIG_TAGS.get(key, {})
-        league_st   = standings.get(key, {})
+        key = m['leagueKey']
+        lt  = CONFIG_TAGS.get(key, {})
+        ls  = standings.get(key, {})
         for side in ('H', 'A'):
             team = m['home'] if side == 'H' else m['away']
             if key == 'kkd' and team in JONG_TEAMS:
-                m[f'stake{side}'] = 'mid'
-                m[f'r{side}']     = None
-                continue
-            pos = league_st.get(team)
+                m[f'stake{side}'] = 'mid'; m[f'r{side}'] = None; continue
+            pos = ls.get(team)
             m[f'r{side}']     = pos
-            m[f'stake{side}'] = league_tags.get(str(pos), 'mid') if pos else 'mid'
+            m[f'stake{side}'] = lt.get(str(pos), 'mid') if pos else 'mid'
     tagged = sum(1 for m in matches if m['stakeH'] != 'mid' or m['stakeA'] != 'mid')
     ranked = sum(1 for m in matches if m.get('rH') or m.get('rA'))
     print(f"  → {tagged}/{len(matches)} met tags, {ranked}/{len(matches)} met positie")
     return matches
 
 
+# ── Stap 4: HTML ─────────────────────────────────────────────────────────────
 def write_html(matches):
     now_dt    = datetime.datetime.now()
     nl_days   = ['ma','di','wo','do','vr','za','zo']
@@ -564,6 +451,7 @@ def write_html(matches):
     return html
 
 
+# ── Main ─────────────────────────────────────────────────────────────────────
 if __name__ == '__main__':
     print(f"=== games2watch update {datetime.datetime.now():%Y-%m-%d %H:%M} ===")
     if DRY_RUN: print("[DRY RUN]")
