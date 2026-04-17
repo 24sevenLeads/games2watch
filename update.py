@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 update.py — dagelijkse update voor games2watch.eu/nl
+Parset iservoetbalvanavond.nl via __NEXT_DATA__ JSON (Next.js)
 """
 
 import json, re, sys, datetime
@@ -36,6 +37,9 @@ COMP_MAP = {
     'Taça de Portugal':             ('tacaportugal', '🇵🇹', 'Taça de Portugal'),
 }
 
+SKIP_WORDS = ['youth','u19','u21','vrouwen','dames','women',
+              'wk kwalificatie','league two','football league two']
+
 JONG_TEAMS = {'Jong Ajax','Jong PSV','Jong AZ','Jong FC Utrecht','Jong Utrecht'}
 
 STANDINGS_URLS = {
@@ -53,7 +57,10 @@ STANDINGS_URLS = {
 
 
 def fetch(url):
-    req = Request(url, headers={'User-Agent': 'Mozilla/5.0 games2watch/1.0'})
+    req = Request(url, headers={
+        'User-Agent': 'Mozilla/5.0 (compatible; games2watch/1.0)',
+        'Accept': 'text/html,application/xhtml+xml',
+    })
     with urlopen(req, timeout=20) as r:
         return r.read().decode('utf-8', errors='replace')
 
@@ -65,156 +72,142 @@ def day_label(d):
 
 
 def channel_info(raw):
+    if not raw:
+        return {'cls': 'other', 'free': False, 'label': '?'}
     ch = CONFIG_CHANNELS['channels']
+    # Exacte match
     if raw in ch:
         return ch[raw]
+    # Case-insensitieve match
     for key, val in ch.items():
         if key.lower() == raw.lower():
             return val
-    # Gedeeltelijke match
-    for key, val in ch.items():
-        if key.lower() in raw.lower() or raw.lower() in key.lower():
-            return val
+    # Gedeeltelijke match (langste key die matcht)
+    matches = [(k, v) for k, v in ch.items() if k.lower() in raw.lower()]
+    if matches:
+        return max(matches, key=lambda x: len(x[0]))[1]
     return {'cls': 'other', 'free': False, 'label': raw}
 
 
-# ── Stap 1: Speelschema ─────────────────────────────────────────────────────
+# ── Stap 1: Speelschema via __NEXT_DATA__ ───────────────────────────────────
 def fetch_schedule():
     print("Stap 1: Speelschema ophalen...")
     html = fetch('https://www.iservoetbalvanavond.nl')
 
+    # Zoek __NEXT_DATA__ JSON in de HTML
+    m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.S)
+    if not m:
+        print("  FOUT: __NEXT_DATA__ niet gevonden — fallback naar HTML parser")
+        return fetch_schedule_html(html)
+
+    try:
+        data = json.loads(m.group(1))
+    except json.JSONDecodeError as e:
+        print(f"  FOUT: JSON parse fout: {e}")
+        return fetch_schedule_html(html)
+
+    # Doorzoek de JSON structuur naar wedstrijddata
+    # Dump de structuur om te begrijpen hoe het is opgebouwd
+    raw_str = json.dumps(data)
+    print(f"  __NEXT_DATA__ gevonden ({len(raw_str)} chars)")
+
+    # Probeer verschillende mogelijke structuren
+    matches = []
+    page_props = data.get('props', {}).get('pageProps', {})
+    
+    # Log de keys op het hoogste niveau
+    print(f"  pageProps keys: {list(page_props.keys())[:10]}")
+
+    # Zoek naar lijsten met wedstrijddata
+    def find_matches(obj, depth=0):
+        if depth > 5: return []
+        results = []
+        if isinstance(obj, list):
+            for item in obj:
+                results += find_matches(item, depth+1)
+        elif isinstance(obj, dict):
+            # Check of dit een wedstrijd is
+            keys = set(obj.keys())
+            if any(k in keys for k in ['home','away','homeTeam','awayTeam','teams']):
+                results.append(obj)
+            else:
+                for v in obj.values():
+                    results += find_matches(v, depth+1)
+        return results
+
+    raw_matches = find_matches(page_props)
+    print(f"  Wedstrijd-objecten gevonden: {len(raw_matches)}")
+
+    if raw_matches:
+        print(f"  Voorbeeld: {json.dumps(raw_matches[0])[:200]}")
+
+    # Als we niets vinden, fallback naar HTML parser
+    if not raw_matches:
+        print("  Geen wedstrijden in JSON gevonden — fallback naar HTML parser")
+        return fetch_schedule_html(html)
+
+    return matches
+
+
+def fetch_schedule_html(html):
+    """Fallback: parse HTML direct met regex op anchor tags en structuur."""
+    print("  HTML parser actief...")
     today = datetime.date.today()
     NL_MONTHS = {
         'januari':1,'februari':2,'maart':3,'april':4,'mei':5,'juni':6,
         'juli':7,'augustus':8,'september':9,'oktober':10,'november':11,'december':12
     }
 
-    def parse_date(header):
-        h = header.lower().strip()
-        if 'vandaag' in h: return today
-        if 'morgen'  in h: return today + datetime.timedelta(days=1)
-        m = re.search(r'(\d+)\s+(\w+)', h)
+    def parse_date_str(s):
+        s = s.lower().strip()
+        if 'vandaag' in s: return today
+        if 'morgen'  in s: return today + datetime.timedelta(days=1)
+        m = re.search(r'(\d+)\s+(\w+)', s)
         if m:
-            day_num   = int(m.group(1))
-            month_num = NL_MONTHS.get(m.group(2))
-            if month_num:
+            dn = int(m.group(1))
+            mn = NL_MONTHS.get(m.group(2))
+            if mn:
                 year = today.year
-                d = datetime.date(year, month_num, day_num)
+                d = datetime.date(year, mn, dn)
                 if d < today - datetime.timedelta(days=1):
-                    d = datetime.date(year + 1, month_num, day_num)
+                    d = datetime.date(year+1, mn, dn)
                 return d
         return None
 
-    skip_words = ['youth','u19','u21','vrouwen','dames','women',
-                  'wk kwalificatie','league two','football league two']
-
     matches = []
-    day_blocks = re.split(r'\n(?=## )', html)
 
-    for block in day_blocks:
-        header_m = re.match(r'## (.+)', block)
+    # Zoek dag-headers: <h2>Vandaag</h2> of ## Vandaag
+    # Splits HTML op dag-secties
+    # Patroon: h2 tag gevolgd door wedstrijdblokken
+    sections = re.split(r'<h2[^>]*>', html)
+
+    for section in sections[1:]:  # sla eerste (voor eerste h2) over
+        header_m = re.match(r'([^<]+)</h2>', section)
         if not header_m:
             continue
-        match_date = parse_date(header_m.group(1))
+        match_date = parse_date_str(header_m.group(1))
         if not match_date:
             continue
 
-        # Splits op tijdblokken
-        time_blocks = re.split(r'\n(?=\d{2}:\d{2}\n)', block)
+        print(f"  Dag: {header_m.group(1).strip()} → {match_date}")
 
-        for tb in time_blocks:
-            lines = tb.strip().splitlines()
-            if not lines:
-                continue
+        # Zoek tijden + competities + teams in deze sectie
+        # Tijden staan in <p> of <div> tags
+        # Teams staan als <a href="/clubs-en-teams/...">Teamnaam</a>
+        
+        # Zoek alle tijden
+        times = re.findall(r'(\d{2}:\d{2})', section[:50000])
+        # Zoek alle teamlinks
+        team_links = re.findall(
+            r'href="/clubs-en-teams/[^"]*"[^>]*>([^<]+)</a>', section)
+        # Zoek competitienamen (staan tussen tijd en teams)
+        comp_names = re.findall(
+            r'<(?:h3|h4|p|div)[^>]*>\s*([^<]{3,50})\s*</(?:h3|h4|p|div)>',
+            section)
 
-            # Eerste regel = tijd
-            time_m = re.match(r'^(\d{2}:\d{2})$', lines[0].strip())
-            if not time_m:
-                continue
-            time_str = time_m.group(1)
+        print(f"    Tijden: {times[:5]}, Teams: {team_links[:6]}")
 
-            # Eerste niet-lege regel na tijd = competitienaam
-            comp_name = ''
-            for l in lines[1:]:
-                if l.strip() and not l.strip().startswith('|'):
-                    comp_name = l.strip()
-                    break
-
-            if comp_name not in COMP_MAP:
-                continue
-            if any(w in comp_name.lower() for w in skip_words):
-                continue
-
-            key, flag, comp_label = COMP_MAP[comp_name]
-
-            # Tabelrijen
-            table_rows = [l for l in lines
-                          if l.strip().startswith('|') and '---' not in l]
-
-            i = 0
-            while i + 1 < len(table_rows):
-                row1 = table_rows[i]
-                row2 = table_rows[i + 1]
-
-                def get_team(row):
-                    # Link met title attribuut: [Naam](url "Naam")
-                    m = re.search(r'\[([^\]]+)\]\([^)]*"[^"]*"\)', row)
-                    if m: return m.group(1)
-                    # Gewone link: [Naam](url)
-                    m2 = re.search(r'\[([^\]]+)\]\(https?://[^)]+\)', row)
-                    return m2.group(1) if m2 else None
-
-                def get_channel(row):
-                    cells = [c.strip() for c in row.split('|') if c.strip()]
-                    if not cells: return '?'
-                    last = cells[-1]
-                    # Link: [Kanaal](url)
-                    m = re.search(r'\[([^\]]+)\]', last)
-                    if m: return m.group(1)
-                    # Meerdere kanalen (neem eerste)
-                    parts = re.split(r'\s{2,}', last)
-                    return parts[0].strip() if parts else last
-
-                home = get_team(row1)
-                away = get_team(row2)
-
-                if not home or not away:
-                    i += 2
-                    continue
-
-                ch_raw = get_channel(row1)
-                if not ch_raw or ch_raw in ['-', '']:
-                    ch_raw = get_channel(row2)
-
-                ch = channel_info(ch_raw)
-
-                matches.append({
-                    'sk':        f"{match_date} {time_str}",
-                    'day':       day_label(match_date),
-                    'date':      str(match_date),
-                    'time':      time_str,
-                    'comp':      comp_label,
-                    'leagueKey': key,
-                    'flag':      flag,
-                    'home':      home,
-                    'away':      away,
-                    'rH':        None,
-                    'rA':        None,
-                    'stakeH':    'mid',
-                    'stakeA':    'mid',
-                    'tv': {
-                        'label': ch.get('label', ch_raw),
-                        'cls':   ch.get('cls', 'other'),
-                        'free':  ch.get('free', False),
-                    },
-                    'legScore':  None,
-                })
-                i += 2
-
-    matches.sort(key=lambda x: x['sk'])
-    print(f"  → {len(matches)} wedstrijden gevonden")
-    for m in matches[:3]:
-        print(f"     {m['date']} {m['time']} {m['home']} - {m['away']} [{m['tv']['label']}]")
+    print(f"  → {len(matches)} wedstrijden gevonden via HTML")
     return matches
 
 
@@ -226,9 +219,8 @@ def fetch_standings():
     for league_key, url in STANDINGS_URLS.items():
         try:
             html = fetch(url)
-
-            # Methode 1: wikitabel scope="row" patroon
             teams = {}
+            # Wikipedia tabel: <th scope="row">1</th>...<a title="Teamname">
             rows = re.findall(
                 r'scope="row"[^>]*>\s*(\d+)\s*</th>(.*?)</tr>',
                 html, re.S
@@ -236,11 +228,14 @@ def fetch_standings():
             for pos_str, row_html in rows:
                 pos = int(pos_str)
                 if pos > 24: break
-                # Zoek teamnaam in title attribuut van link
-                tm = re.search(r'title="([^"(]+?)(?:\s*\(|")', row_html)
+                tm = re.search(r'title="([^"(]+?)(?:\s*\(football\)|\s*F\.C\.\s*\(|")',
+                               row_html)
+                if not tm:
+                    tm = re.search(r'title="([^"]+)"', row_html)
                 if tm:
                     team = tm.group(1).strip()
-                    if team not in teams:
+                    # Filter Wikipedia disambiguatie
+                    if '(' not in team and team not in teams:
                         teams[team] = pos
 
             if teams:
@@ -258,24 +253,19 @@ def fetch_standings():
 # ── Stap 3: Tags ────────────────────────────────────────────────────────────
 def apply_tags(matches, standings):
     print("Stap 3: Tags toepassen...")
-
     for m in matches:
-        key          = m['leagueKey']
-        league_tags  = CONFIG_TAGS.get(key, {})
-        league_stand = standings.get(key, {})
-
+        key         = m['leagueKey']
+        league_tags = CONFIG_TAGS.get(key, {})
+        league_st   = standings.get(key, {})
         for side in ('H', 'A'):
             team = m['home'] if side == 'H' else m['away']
-
             if key == 'kkd' and team in JONG_TEAMS:
                 m[f'stake{side}'] = 'mid'
                 m[f'r{side}']     = None
                 continue
-
-            pos = league_stand.get(team)
+            pos = league_st.get(team)
             m[f'r{side}']     = pos
             m[f'stake{side}'] = league_tags.get(str(pos), 'mid') if pos else 'mid'
-
     tagged = sum(1 for m in matches if m['stakeH'] != 'mid' or m['stakeA'] != 'mid')
     ranked = sum(1 for m in matches if m.get('rH') or m.get('rA'))
     print(f"  → {tagged}/{len(matches)} met tags, {ranked}/{len(matches)} met positie")
