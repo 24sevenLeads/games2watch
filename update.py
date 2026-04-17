@@ -3,7 +3,7 @@
 update.py — dagelijkse update voor games2watch.eu/nl
 """
 
-import json, re, sys, datetime
+import json, re, sys, datetime, os
 from pathlib import Path
 from urllib.request import urlopen, Request
 
@@ -198,8 +198,8 @@ def fetch_standings():
     print("Stap 2: Standen ophalen via football-data.org...")
     standings = {}
 
-    import os
     api_key = os.environ.get('FOOTBALL_DATA_API_KEY', '')
+    print(f"  API key aanwezig: {bool(api_key)}, lengte: {len(api_key)}")
     if not api_key:
         print("  FOUT: FOOTBALL_DATA_API_KEY niet gevonden")
         return standings
