@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 """
 update.py — dagelijkse update voor games2watch.eu/nl
-Stap 1: Haal speelschema op van iservoetbalvanavond.nl
-Stap 2: Haal standen op per competitie (Wikipedia)
-Stap 3: Combineer met league-tags.json → rH/rA + stakeH/stakeA
-Stap 4: Schrijf nl/index.html
 """
 
 import json, re, sys, datetime
@@ -52,13 +48,13 @@ STANDINGS_URLS = {
     'sa':           'https://en.wikipedia.org/wiki/2025%E2%80%9326_Serie_A',
     'll':           'https://en.wikipedia.org/wiki/2025%E2%80%9326_La_Liga',
     'l1':           'https://en.wikipedia.org/wiki/2025%E2%80%9326_Ligue_1',
-    'primeiraliga': 'https://en.wikipedia.org/wiki/2025%E2%80%9326_Liga_Portugal',
+    'primeiraliga': 'https://en.wikipedia.org/wiki/2025%E2%80%9326_Liga_Portugal_Betclic',
 }
 
 
 def fetch(url):
     req = Request(url, headers={'User-Agent': 'Mozilla/5.0 games2watch/1.0'})
-    with urlopen(req, timeout=15) as r:
+    with urlopen(req, timeout=20) as r:
         return r.read().decode('utf-8', errors='replace')
 
 
@@ -69,16 +65,17 @@ def day_label(d):
 
 
 def channel_info(raw):
-    """Zoek kanaal in config, fallback naar default."""
     ch = CONFIG_CHANNELS['channels']
-    # Exacte match
     if raw in ch:
         return ch[raw]
-    # Gedeeltelijke match (bijv. "ESPN 3" matcht "ESPN 3")
     for key, val in ch.items():
-        if key.lower() in raw.lower():
+        if key.lower() == raw.lower():
             return val
-    return CONFIG_CHANNELS.get('_default', {'cls': 'other', 'free': False, 'label': raw})
+    # Gedeeltelijke match
+    for key, val in ch.items():
+        if key.lower() in raw.lower() or raw.lower() in key.lower():
+            return val
+    return {'cls': 'other', 'free': False, 'label': raw}
 
 
 # ── Stap 1: Speelschema ─────────────────────────────────────────────────────
@@ -108,9 +105,10 @@ def fetch_schedule():
                 return d
         return None
 
-    matches = []
+    skip_words = ['youth','u19','u21','vrouwen','dames','women',
+                  'wk kwalificatie','league two','football league two']
 
-    # Splits op dagblokken: ## Vandaag / ## Morgen / ## Vrijdag 17 april
+    matches = []
     day_blocks = re.split(r'\n(?=## )', html)
 
     for block in day_blocks:
@@ -121,8 +119,7 @@ def fetch_schedule():
         if not match_date:
             continue
 
-        # Splits blok op tijdblokken: regel die begint met HH:MM gevolgd door newline
-        # Patroon: tijd op eigen regel, dan competitienaam, dan tabel
+        # Splits op tijdblokken
         time_blocks = re.split(r'\n(?=\d{2}:\d{2}\n)', block)
 
         for tb in time_blocks:
@@ -136,51 +133,45 @@ def fetch_schedule():
                 continue
             time_str = time_m.group(1)
 
-            # Tweede regel = competitienaam
-            if len(lines) < 2:
-                continue
-            comp_name = lines[1].strip()
+            # Eerste niet-lege regel na tijd = competitienaam
+            comp_name = ''
+            for l in lines[1:]:
+                if l.strip() and not l.strip().startswith('|'):
+                    comp_name = l.strip()
+                    break
 
             if comp_name not in COMP_MAP:
                 continue
-
-            # Skip Youth League, damesvoetbal etc
-            skip_words = ['youth','u19','u21','vrouwen','dames','women',
-                          'wk kwalificatie','league two','football league two']
             if any(w in comp_name.lower() for w in skip_words):
                 continue
 
             key, flag, comp_label = COMP_MAP[comp_name]
 
-            # Tabelrijen: regels die beginnen met |
-            table_rows = [l for l in lines if l.strip().startswith('|')
-                          and '---' not in l]
+            # Tabelrijen
+            table_rows = [l for l in lines
+                          if l.strip().startswith('|') and '---' not in l]
 
-            # Elke 2 rijen = 1 wedstrijd (thuisploeg + uitploeg)
             i = 0
             while i + 1 < len(table_rows):
                 row1 = table_rows[i]
                 row2 = table_rows[i + 1]
 
-                # Extract teamnaam uit markdown link: [Naam](url "Naam")
                 def get_team(row):
+                    # Link met title attribuut: [Naam](url "Naam")
                     m = re.search(r'\[([^\]]+)\]\([^)]*"[^"]*"\)', row)
-                    if m:
-                        return m.group(1)
-                    # Fallback: eerste link tekst
-                    m2 = re.search(r'\[([^\]]+)\]', row)
+                    if m: return m.group(1)
+                    # Gewone link: [Naam](url)
+                    m2 = re.search(r'\[([^\]]+)\]\(https?://[^)]+\)', row)
                     return m2.group(1) if m2 else None
 
-                # Extract kanaal: laatste cel van de rijen
                 def get_channel(row):
                     cells = [c.strip() for c in row.split('|') if c.strip()]
-                    # Kanaal staat in de laatste cel
-                    last = cells[-1] if cells else ''
+                    if not cells: return '?'
+                    last = cells[-1]
                     # Link: [Kanaal](url)
                     m = re.search(r'\[([^\]]+)\]', last)
-                    if m:
-                        return m.group(1)
-                    # Meerdere kanalen gescheiden door twee spaties
+                    if m: return m.group(1)
+                    # Meerdere kanalen (neem eerste)
                     parts = re.split(r'\s{2,}', last)
                     return parts[0].strip() if parts else last
 
@@ -191,7 +182,6 @@ def fetch_schedule():
                     i += 2
                     continue
 
-                # Kanaal: probeer eerste uit row1, fallback row2
                 ch_raw = get_channel(row1)
                 if not ch_raw or ch_raw in ['-', '']:
                     ch_raw = get_channel(row2)
@@ -223,7 +213,7 @@ def fetch_schedule():
 
     matches.sort(key=lambda x: x['sk'])
     print(f"  → {len(matches)} wedstrijden gevonden")
-    for m in matches[:5]:
+    for m in matches[:3]:
         print(f"     {m['date']} {m['time']} {m['home']} - {m['away']} [{m['tv']['label']}]")
     return matches
 
@@ -236,23 +226,27 @@ def fetch_standings():
     for league_key, url in STANDINGS_URLS.items():
         try:
             html = fetch(url)
+
+            # Methode 1: wikitabel scope="row" patroon
             teams = {}
             rows = re.findall(
-                r'scope="row"[^>]*>\s*(\d+)\s*</th>.*?title="([^"(]+)"',
+                r'scope="row"[^>]*>\s*(\d+)\s*</th>(.*?)</tr>',
                 html, re.S
             )
-            for pos_str, team_raw in rows:
-                pos  = int(pos_str)
-                team = team_raw.strip()
-                if team not in teams:
-                    teams[team] = pos
-                if pos > 24:
-                    break
+            for pos_str, row_html in rows:
+                pos = int(pos_str)
+                if pos > 24: break
+                # Zoek teamnaam in title attribuut van link
+                tm = re.search(r'title="([^"(]+?)(?:\s*\(|")', row_html)
+                if tm:
+                    team = tm.group(1).strip()
+                    if team not in teams:
+                        teams[team] = pos
 
             if teams:
+                top = min(teams, key=teams.get)
                 standings[league_key] = teams
-                print(f"  → {league_key}: {len(teams)} teams (#{1}: "
-                      f"{next(t for t,p in teams.items() if p==1)})")
+                print(f"  → {league_key}: {len(teams)} teams (#1: {top})")
             else:
                 print(f"  → {league_key}: geen teams gevonden")
         except Exception as e:
@@ -279,7 +273,7 @@ def apply_tags(matches, standings):
                 continue
 
             pos = league_stand.get(team)
-            m[f'r{side}'] = pos
+            m[f'r{side}']     = pos
             m[f'stake{side}'] = league_tags.get(str(pos), 'mid') if pos else 'mid'
 
     tagged = sum(1 for m in matches if m['stakeH'] != 'mid' or m['stakeA'] != 'mid')
@@ -288,19 +282,17 @@ def apply_tags(matches, standings):
     return matches
 
 
-# ── Stap 4: HTML schrijven ───────────────────────────────────────────────────
+# ── Stap 4: HTML ────────────────────────────────────────────────────────────
 def write_html(matches):
-    now_dt  = datetime.datetime.now()
+    now_dt    = datetime.datetime.now()
     nl_days   = ['ma','di','wo','do','vr','za','zo']
     nl_months = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec']
-    now_str = (f"{nl_days[now_dt.weekday()]} {now_dt.day} "
-               f"{nl_months[now_dt.month-1]} {now_dt.strftime('%H:%M')}")
-
-    matches_json = json.dumps(matches, ensure_ascii=False)
+    now_str   = (f"{nl_days[now_dt.weekday()]} {now_dt.day} "
+                 f"{nl_months[now_dt.month-1]} {now_dt.strftime('%H:%M')}")
 
     html = re.sub(
         r'let MATCHES = \[.*?\];',
-        f'let MATCHES = {matches_json};',
+        'let MATCHES = ' + json.dumps(matches, ensure_ascii=False) + ';',
         TEMPLATE, flags=re.S
     )
     html = re.sub(
@@ -312,9 +304,7 @@ def write_html(matches):
     out = ROOT / 'nl/index.html'
     if not DRY_RUN:
         out.write_text(html)
-        print(f"Stap 4: nl/index.html geschreven ({now_str})")
-    else:
-        print(f"Stap 4: [dry-run] → {out} ({now_str})")
+    print(f"Stap 4: nl/index.html geschreven ({now_str})")
     return html
 
 
