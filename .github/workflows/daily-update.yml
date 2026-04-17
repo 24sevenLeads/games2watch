@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       FOOTBALL_DATA_API_KEY: ${{ secrets.FOOTBALL_DATA_API_KEY }}
+      PYTHONUNBUFFERED: "1"
 
     steps:
       - name: Checkout repo
