@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
 update.py — dagelijkse update voor games2watch.eu/nl
-Parset iservoetbalvanavond.nl via __NEXT_DATA__ JSON (Next.js)
 """
 
 import json, re, sys, datetime
@@ -75,140 +74,36 @@ def channel_info(raw):
     if not raw:
         return {'cls': 'other', 'free': False, 'label': '?'}
     ch = CONFIG_CHANNELS['channels']
-    # Exacte match
-    if raw in ch:
-        return ch[raw]
-    # Case-insensitieve match
+    if raw in ch: return ch[raw]
     for key, val in ch.items():
-        if key.lower() == raw.lower():
-            return val
-    # Gedeeltelijke match (langste key die matcht)
+        if key.lower() == raw.lower(): return val
     matches = [(k, v) for k, v in ch.items() if k.lower() in raw.lower()]
     if matches:
         return max(matches, key=lambda x: len(x[0]))[1]
     return {'cls': 'other', 'free': False, 'label': raw}
 
 
-# ── Stap 1: Speelschema via __NEXT_DATA__ ───────────────────────────────────
+# ── Stap 1: Speelschema ─────────────────────────────────────────────────────
 def fetch_schedule():
     print("Stap 1: Speelschema ophalen...")
     html = fetch('https://www.iservoetbalvanavond.nl')
 
-    # Zoek __NEXT_DATA__ JSON in de HTML
     m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.S)
     if not m:
-        print("  FOUT: __NEXT_DATA__ niet gevonden — fallback naar HTML parser")
-        return fetch_schedule_html(html)
+        print("  FOUT: __NEXT_DATA__ niet gevonden")
+        return []
 
-    try:
-        data = json.loads(m.group(1))
-    except json.JSONDecodeError as e:
-        print(f"  FOUT: JSON parse fout: {e}")
-        return fetch_schedule_html(html)
-
-    # Doorzoek de JSON structuur naar wedstrijddata
-    # Dump de structuur om te begrijpen hoe het is opgebouwd
-    raw_str = json.dumps(data)
-    print(f"  __NEXT_DATA__ gevonden ({len(raw_str)} chars)")
-
-    # Probeer verschillende mogelijke structuren
-    matches = []
+    data = json.loads(m.group(1))
     page_props = data.get('props', {}).get('pageProps', {})
-    
-    # Log de keys op het hoogste niveau
-    print(f"  pageProps keys: {list(page_props.keys())[:10]}")
 
-    # Zoek naar lijsten met wedstrijddata
-    def find_matches(obj, depth=0):
-        if depth > 5: return []
-        results = []
-        if isinstance(obj, list):
-            for item in obj:
-                results += find_matches(item, depth+1)
-        elif isinstance(obj, dict):
-            # Check of dit een wedstrijd is
-            keys = set(obj.keys())
-            if any(k in keys for k in ['home','away','homeTeam','awayTeam','teams']):
-                results.append(obj)
-            else:
-                for v in obj.values():
-                    results += find_matches(v, depth+1)
-        return results
+    # broadcastsResponse bevat de wedstrijden
+    broadcasts = page_props.get('broadcastsResponse', {})
+    print(f"  broadcastsResponse keys: {list(broadcasts.keys())[:10]}")
 
-    raw_matches = find_matches(page_props)
-    print(f"  Wedstrijd-objecten gevonden: {len(raw_matches)}")
+    # Dump volledige structuur voor debugging
+    print(f"  DUMP broadcastsResponse: {json.dumps(broadcasts)[:500]}")
 
-    if raw_matches:
-        print(f"  Voorbeeld: {json.dumps(raw_matches[0])[:200]}")
-
-    # Als we niets vinden, fallback naar HTML parser
-    if not raw_matches:
-        print("  Geen wedstrijden in JSON gevonden — fallback naar HTML parser")
-        return fetch_schedule_html(html)
-
-    return matches
-
-
-def fetch_schedule_html(html):
-    """Fallback: parse HTML direct met regex op anchor tags en structuur."""
-    print("  HTML parser actief...")
-    today = datetime.date.today()
-    NL_MONTHS = {
-        'januari':1,'februari':2,'maart':3,'april':4,'mei':5,'juni':6,
-        'juli':7,'augustus':8,'september':9,'oktober':10,'november':11,'december':12
-    }
-
-    def parse_date_str(s):
-        s = s.lower().strip()
-        if 'vandaag' in s: return today
-        if 'morgen'  in s: return today + datetime.timedelta(days=1)
-        m = re.search(r'(\d+)\s+(\w+)', s)
-        if m:
-            dn = int(m.group(1))
-            mn = NL_MONTHS.get(m.group(2))
-            if mn:
-                year = today.year
-                d = datetime.date(year, mn, dn)
-                if d < today - datetime.timedelta(days=1):
-                    d = datetime.date(year+1, mn, dn)
-                return d
-        return None
-
-    matches = []
-
-    # Zoek dag-headers: <h2>Vandaag</h2> of ## Vandaag
-    # Splits HTML op dag-secties
-    # Patroon: h2 tag gevolgd door wedstrijdblokken
-    sections = re.split(r'<h2[^>]*>', html)
-
-    for section in sections[1:]:  # sla eerste (voor eerste h2) over
-        header_m = re.match(r'([^<]+)</h2>', section)
-        if not header_m:
-            continue
-        match_date = parse_date_str(header_m.group(1))
-        if not match_date:
-            continue
-
-        print(f"  Dag: {header_m.group(1).strip()} → {match_date}")
-
-        # Zoek tijden + competities + teams in deze sectie
-        # Tijden staan in <p> of <div> tags
-        # Teams staan als <a href="/clubs-en-teams/...">Teamnaam</a>
-        
-        # Zoek alle tijden
-        times = re.findall(r'(\d{2}:\d{2})', section[:50000])
-        # Zoek alle teamlinks
-        team_links = re.findall(
-            r'href="/clubs-en-teams/[^"]*"[^>]*>([^<]+)</a>', section)
-        # Zoek competitienamen (staan tussen tijd en teams)
-        comp_names = re.findall(
-            r'<(?:h3|h4|p|div)[^>]*>\s*([^<]{3,50})\s*</(?:h3|h4|p|div)>',
-            section)
-
-        print(f"    Tijden: {times[:5]}, Teams: {team_links[:6]}")
-
-    print(f"  → {len(matches)} wedstrijden gevonden via HTML")
-    return matches
+    return []
 
 
 # ── Stap 2: Standen ─────────────────────────────────────────────────────────
@@ -220,7 +115,6 @@ def fetch_standings():
         try:
             html = fetch(url)
             teams = {}
-            # Wikipedia tabel: <th scope="row">1</th>...<a title="Teamname">
             rows = re.findall(
                 r'scope="row"[^>]*>\s*(\d+)\s*</th>(.*?)</tr>',
                 html, re.S
@@ -228,15 +122,13 @@ def fetch_standings():
             for pos_str, row_html in rows:
                 pos = int(pos_str)
                 if pos > 24: break
-                tm = re.search(r'title="([^"(]+?)(?:\s*\(football\)|\s*F\.C\.\s*\(|")',
-                               row_html)
-                if not tm:
-                    tm = re.search(r'title="([^"]+)"', row_html)
-                if tm:
-                    team = tm.group(1).strip()
-                    # Filter Wikipedia disambiguatie
-                    if '(' not in team and team not in teams:
-                        teams[team] = pos
+                # Zoek alle title attributen, neem de eerste die geen disambiguatie heeft
+                titles = re.findall(r'title="([^"]+)"', row_html)
+                for t in titles:
+                    t = t.strip()
+                    if t and '(' not in t and len(t) > 2 and t not in teams:
+                        teams[t] = pos
+                        break
 
             if teams:
                 top = min(teams, key=teams.get)
@@ -250,7 +142,7 @@ def fetch_standings():
     return standings
 
 
-# ── Stap 3: Tags ────────────────────────────────────────────────────────────
+# ── Stap 3-4 ongewijzigd ────────────────────────────────────────────────────
 def apply_tags(matches, standings):
     print("Stap 3: Tags toepassen...")
     for m in matches:
@@ -272,7 +164,6 @@ def apply_tags(matches, standings):
     return matches
 
 
-# ── Stap 4: HTML ────────────────────────────────────────────────────────────
 def write_html(matches):
     now_dt    = datetime.datetime.now()
     nl_days   = ['ma','di','wo','do','vr','za','zo']
@@ -298,11 +189,9 @@ def write_html(matches):
     return html
 
 
-# ── Main ────────────────────────────────────────────────────────────────────
 if __name__ == '__main__':
     print(f"=== games2watch update {datetime.datetime.now():%Y-%m-%d %H:%M} ===")
-    if DRY_RUN:
-        print("[DRY RUN]")
+    if DRY_RUN: print("[DRY RUN]")
 
     matches   = fetch_schedule()
     standings = fetch_standings()
