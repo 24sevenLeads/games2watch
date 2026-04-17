@@ -109,6 +109,13 @@ TEAM_ALIASES = {
     'SC Braga':'Sporting Clube de Braga',
     'Sporting Clube de Braga':'Sporting Clube de Braga',
     'CD Tondela':'Tondela', 'C.D. Tondela':'Tondela',
+
+    # Ligue 1 - RC Strasbourg
+    'RC Strasbourg Alsace':'RC Strasbourg',
+    'Strasbourg':'RC Strasbourg',
+    # KKD - Jong Utrecht heeft twee namen
+    'Jong FC Utrecht':'Jong Utrecht',
+    'Jong Utrecht':'Jong Utrecht',
     # 2. Bundesliga (OpenLigaDB ShortName -> iservoetbalvanavond.nl)    # 2. Bundesliga (OpenLigaDB ShortName -> iservoetbalvanavond.nl)
     'Schalke':       'FC Schalke 04',
     'Paderborn':     'SC Paderborn 07',
@@ -363,6 +370,18 @@ def fetch_standings():
 # ── Stap 3: Tags ─────────────────────────────────────────────────────────────
 def apply_tags(matches, standings):
     print("Stap 3: Tags toepassen...")
+    # Naam-normalisatie: iservoetbalvanavond naam -> standings naam
+    NAME_FIX = {
+        'FC Magdeburg':    '1. FC Magdeburg',
+        'Strasbourg':      'RC Strasbourg Alsace',
+        'Nantes':          'FC Nantes',
+        'Pisa SC':         'Pisa',
+        'U.S. Lecce':      'US Lecce',
+        'Jong Utrecht':    'Jong FC Utrecht',
+        'Le Havre':        'Le Havre AC',
+        'Paris FC':        'Paris FC',
+    }
+
     for m in matches:
         key = m['leagueKey']
         lt  = CONFIG_TAGS.get(key, {})
@@ -371,7 +390,7 @@ def apply_tags(matches, standings):
             team = m['home'] if side == 'H' else m['away']
             if key == 'kkd' and team in JONG_TEAMS:
                 m[f'stake{side}'] = 'mid'; m[f'r{side}'] = None; continue
-            pos = ls.get(team)
+            pos = ls.get(NAME_FIX.get(team, team))
             m[f'r{side}']     = pos
             m[f'stake{side}'] = lt.get(str(pos), 'mid') if pos else 'mid'
     tagged = sum(1 for m in matches if m['stakeH'] != 'mid' or m['stakeA'] != 'mid')
