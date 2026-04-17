@@ -406,61 +406,49 @@ def fetch_kkd_standings():
 
 
 def fetch_bl2_standings():
-    """Haal 2.Bundesliga stand op via bundesliga.com __NEXT_DATA__."""
+    """Haal 2.Bundesliga stand op via Wikipedia."""
     try:
-        html = fetch('https://www.bundesliga.com/en/2bundesliga/table')
-        import json as _json
+        html = fetch('https://en.wikipedia.org/wiki/2025%E2%80%9326_2._Bundesliga')
+        teams = {}
 
-        m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.S)
-        if not m:
-            print("  -> bl2: geen __NEXT_DATA__")
+        # Zoek de wikitable sortable
+        table_m = re.search(
+            r'<table[^>]*wikitable[^>]*sortable[^>]*>(.*?)</table>',
+            html, re.S)
+        if not table_m:
+            table_m = re.search(r'<table[^>]*wikitable[^>]*>(.*?)</table>', html, re.S)
+        if not table_m:
+            print("  -> bl2: geen wikitable")
             return {}
 
-        data = _json.loads(m.group(1))
+        table_html = table_m.group(1)
+        tr_blocks = re.findall(r'<tr[^>]*>(.*?)</tr>', table_html, re.S)
 
-        def find_standings(obj, depth=0):
-            if depth > 8: return []
-            if isinstance(obj, list) and len(obj) >= 5:
-                first = obj[0] if obj else {}
-                if isinstance(first, dict) and any(
-                    k in first for k in ['position','rank','clubName','shortName','abbreviation']
-                ):
-                    return obj
-            if isinstance(obj, dict):
-                for v in obj.values():
-                    r = find_standings(v, depth+1)
-                    if r: return r
-            elif isinstance(obj, list):
-                for item in obj:
-                    r = find_standings(item, depth+1)
-                    if r: return r
-            return []
-
-        page_props = data.get('props', {}).get('pageProps', {})
-        rows = find_standings(page_props)
-
-        if rows:
-            print("  -> bl2 row[0] keys: " + str(list(rows[0].keys())[:10]))
-
-        teams = {}
-        for row in rows:
-            if not isinstance(row, dict): continue
-            pos  = row.get('position') or row.get('rank')
-            name = (row.get('clubName') or row.get('shortName') or
-                    row.get('abbreviation') or row.get('name') or '')
-            if not name:
-                club = row.get('club') or row.get('team') or {}
-                if isinstance(club, dict):
-                    name = club.get('name') or club.get('shortName') or ''
-            if pos and name:
-                teams[name] = int(pos)
+        for tr in tr_blocks:
+            if 'infobox' in tr:
+                continue
+            pos_m = re.search(r'<th[^>]+scope="row"[^>]*>\s*(\d+)\s*<', tr)
+            if not pos_m:
+                continue
+            pos = int(pos_m.group(1))
+            if pos > 18:
+                break
+            td_links = re.findall(
+                r'<td[^>]*>.*?<a[^>]+href="/wiki/[^"#]+"[^>]+title="([^"]+)"',
+                tr, re.S)
+            for title in td_links:
+                title = title.strip()
+                clean = re.sub(r'\s*\([^)]+\)\s*$', '', title).strip()
+                if clean and len(clean) > 2 and not clean.isdigit():
+                    if clean not in teams:
+                        teams[clean] = pos
+                    break
 
         if teams:
             top = min(teams, key=teams.get)
-            print("  -> bl2: " + str(len(teams)) + " teams (#1: " + top + ")")
+            print("  -> bl2 (Wikipedia): " + str(len(teams)) + " teams (#1: " + top + ")")
         else:
-            sample = _json.dumps(rows[0])[:300] if rows else "geen rows"
-            print("  -> bl2: 0 teams, row[0]: " + sample)
+            print("  -> bl2: geen teams gevonden")
         return teams
     except Exception as e:
         print("  -> bl2 fout: " + str(e))
