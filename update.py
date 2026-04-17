@@ -143,29 +143,16 @@ def fetch_schedule():
         key, flag, comp_label = COMP_MAP[comp_raw]
 
         # Kanalen: item.get('broadcasts') is een lijst van broadcast-objecten
+        # Kanaal: zit als {"channel": {"name": "Viaplay", ...}} in broadcasts lijst
         broadcasts_list = item.get('broadcasts', []) or []
         ch_raw = '?'
-        if broadcasts_list:
-            first_b = broadcasts_list[0]
-            if isinstance(first_b, str):
-                ch_raw = first_b
-            elif isinstance(first_b, dict):
-                # Probeer alle mogelijke veldnamen voor kanaalnaam
-                def extract_name(obj):
-                    if not isinstance(obj, dict): return ''
-                    return (obj.get('name') or obj.get('shortName') or
-                            obj.get('displayName') or obj.get('title') or '')
-                # broadcastChannel > channel > naam direct op object
-                ch_raw = (extract_name(first_b.get('broadcastChannel') or {}) or
-                          extract_name(first_b.get('channel') or {}) or
-                          extract_name(first_b) or '?')
-
-        if not isinstance(ch_raw, str) or not ch_raw:
-            ch_raw = '?'
-
-        # Debug eerste kanaal object bij elke run
-        if broadcasts_list and matches == [] and len(broadcasts) > 0:
-            print(f"  DEBUG kanaal obj: {json.dumps(broadcasts_list[0])[:300]}")
+        for b in broadcasts_list:
+            if not isinstance(b, dict): continue
+            ch_obj = b.get('channel') or {}
+            name = ch_obj.get('name') or ch_obj.get('abbreviation') or ''
+            if name:
+                ch_raw = name
+                break
 
         ch = channel_info(ch_raw)
 
@@ -214,33 +201,50 @@ def fetch_standings():
         try:
             html = fetch(url)
             teams = {}
-            rows = re.findall(
-                r'scope="row"[^>]*>\s*(\d+)\s*</th>(.*?)</tr>',
-                html, re.S
-            )
-            for pos_str, row_html in rows:
-                pos = int(pos_str)
-                if pos > 24: break
-                # Zoek teamnaam: link in de tweede <td> na de positie
-                # Wikipedia: <td><a href="/wiki/TeamName" title="TeamName">TeamName</a>
-                team_links = re.findall(
-                    r'<a[^>]+href="/wiki/[^"]*"[^>]*title="([^"]+)">', row_html)
-                for t in team_links:
-                    t = t.strip()
-                    # Filter: geen disambiguation, geen "F.C." suffixen etc
-                    if t and len(t) > 2 and t not in teams:
-                        # Verwijder "(football club)" achtige toevoegingen
-                        t = re.sub(r'\s*\([^)]*\)\s*$', '', t).strip()
-                        if t:
-                            teams[t] = pos
-                            break
+
+            # Wikipedia raw HTML: standtabel bevat rijen als:
+            # <tr>
+<th scope="row">1</th>
+<td>...</td>
+<td><a href="/wiki/X" title="Club">Club</a>
+            # Zoek alle <tr> blokken die een scope="row" positie bevatten
+            tr_blocks = re.findall(r'<tr[^>]*>(.*?)</tr>', html, re.S)
+
+            for tr in tr_blocks:
+                # Positie
+                pos_m = re.search(r'scope="row"[^>]*>\s*(\d+)\s*<', tr)
+                if not pos_m:
+                    continue
+                pos = int(pos_m.group(1))
+                if pos > 24:
+                    break
+
+                # Teamnaam: zoek <a> link met /wiki/ die NIET naar een persoon/stad linkt
+                # Wikipedia teamlinks hebben title="Clubnaam F.C." of gewoon "Clubnaam"
+                links = re.findall(r'href="/wiki/([^"#]+)"[^>]*title="([^"]+)"', tr)
+                for href, title in links:
+                    title = title.strip()
+                    # Skip: disambiguation, personen, steden etc.
+                    # Teamlinks hebben meestal geen haakjes in title
+                    if '(' in title:
+                        # Verwijder "(association football)" etc
+                        clean = re.sub(r'\s*\([^)]+\)', '', title).strip()
+                    else:
+                        clean = title
+                    # Skip lege, te korte, of cijfer-achtige titels
+                    if clean and len(clean) > 2 and not clean.isdigit():
+                        if clean not in teams:
+                            teams[clean] = pos
+                        break
 
             if teams:
                 top = min(teams, key=teams.get)
                 standings[league_key] = teams
                 print(f"  → {league_key}: {len(teams)} teams (#1: {top})")
             else:
-                print(f"  → {league_key}: geen teams gevonden")
+                # Debug: toon eerste tr met scope=row
+                sample = next((t for t in tr_blocks if 'scope="row"' in t), '')
+                print(f"  → {league_key}: geen teams — sample: {sample[:200]}")
         except Exception as e:
             print(f"  → {league_key}: fout ({e})")
 
