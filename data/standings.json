@@ -98,16 +98,16 @@
     "Bologna F.C. 1909": 8,
     "US Sassuolo Calcio": 9,
     "Lazio": 10,
-    "Udinese Calcio": 11,
-    "Torino FC": 12,
-    "Genoa CFC": 13,
-    "Parma Calcio 1913": 14,
-    "ACF Fiorentina": 15,
+    "Udinese": 11,
+    "Torino": 12,
+    "Genoa": 13,
+    "Parma": 14,
+    "Fiorentina": 15,
     "Cagliari": 16,
-    "US Cremonese": 17,
+    "Cremonese": 17,
     "US Lecce": 18,
     "Verona": 19,
-    "AC Pisa 1909": 20
+    "Pisa": 20
   },
   "ll": {
     "FC Barcelona": 1,
@@ -142,14 +142,14 @@
     "RC Strasbourg Alsace": 8,
     "FC Lorient": 9,
     "Toulouse FC": 10,
-    "Stade Brestois 29": 11,
+    "FC Brest": 11,
     "Paris FC": 12,
-    "Angers SCO": 13,
+    "Angers": 13,
     "Le Havre AC": 14,
     "OGC Nice": 15,
     "AJ Auxerre": 16,
     "FC Nantes": 17,
-    "FC Metz": 18
+    "Metz": 18
   },
   "primeiraliga": {
     "F.C. Porto": 1,
