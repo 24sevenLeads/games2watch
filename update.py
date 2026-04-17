@@ -39,7 +39,7 @@ COMP_MAP = {
 SKIP_WORDS = ['youth','u19','u21','vrouwen','dames','women',
               'wk kwalificatie','league two','football league two']
 
-JONG_TEAMS = {'Jong Ajax','Jong PSV','Jong AZ','Jong FC Utrecht','Jong Utrecht'}
+JONG_TEAMS = {'Jong Ajax','Jong PSV','Jong AZ','Jong FC Utrecht'}
 
 TEAM_ALIASES = {
     # Premier League (football-data -> iservoetbalvanavond)
