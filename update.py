@@ -390,7 +390,10 @@ def apply_tags(matches, standings):
             team = m['home'] if side == 'H' else m['away']
             if key == 'kkd' and team in JONG_TEAMS:
                 m[f'stake{side}'] = 'mid'; m[f'r{side}'] = None; continue
-            pos = ls.get(NAME_FIX.get(team, team))
+            fixed = NAME_FIX.get(team, team)
+            pos = ls.get(fixed)
+            if not pos and key == 'l1' and team == 'Strasbourg':
+                print(f"  DEBUG Strasbourg: fixed='{fixed}', l1 keys={list(ls.keys())[:5]}")
             m[f'r{side}']     = pos
             m[f'stake{side}'] = lt.get(str(pos), 'mid') if pos else 'mid'
     tagged = sum(1 for m in matches if m['stakeH'] != 'mid' or m['stakeA'] != 'mid')
