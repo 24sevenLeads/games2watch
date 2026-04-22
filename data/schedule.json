@@ -1,68 +1,5 @@
 [
   {
-    "sk": "2026-04-21 20:45",
-    "day": "Di 21 apr",
-    "date": "2026-04-21",
-    "time": "20:45",
-    "comp": "Championship",
-    "leagueKey": "champ",
-    "flag": "ENG",
-    "home": "Leicester City",
-    "away": "Hull City",
-    "rH": 23,
-    "rA": 6,
-    "stakeH": "rel-direct",
-    "stakeA": "cl-pre",
-    "tv": {
-      "label": "Viaplay",
-      "cls": "viaplay",
-      "free": false
-    },
-    "legScore": null
-  },
-  {
-    "sk": "2026-04-21 21:00",
-    "day": "Di 21 apr",
-    "date": "2026-04-21",
-    "time": "21:00",
-    "comp": "Coppa Italia",
-    "leagueKey": "coppaitalia",
-    "flag": "🇮🇹",
-    "home": "Inter Milan",
-    "away": "Como 1907",
-    "rH": null,
-    "rA": null,
-    "stakeH": "mid",
-    "stakeA": "mid",
-    "tv": {
-      "label": "Ziggo Sport",
-      "cls": "ziggo",
-      "free": false
-    },
-    "legScore": null
-  },
-  {
-    "sk": "2026-04-21 21:00",
-    "day": "Di 21 apr",
-    "date": "2026-04-21",
-    "time": "21:00",
-    "comp": "Premier League",
-    "leagueKey": "pl",
-    "flag": "ENG",
-    "home": "Brighton & Hove Albion",
-    "away": "Chelsea",
-    "rH": 9,
-    "rA": 6,
-    "stakeH": "mid",
-    "stakeA": "el-direct",
-    "tv": {
-      "label": "Viaplay",
-      "cls": "viaplay",
-      "free": false
-    },
-    "legScore": null
-  },
-  {
     "sk": "2026-04-22 19:00",
     "day": "Wo 22 apr",
     "date": "2026-04-22",
@@ -109,27 +46,6 @@
     "day": "Wo 22 apr",
     "date": "2026-04-22",
     "time": "20:45",
-    "comp": "Championship",
-    "leagueKey": "champ",
-    "flag": "ENG",
-    "home": "Charlton Athletic",
-    "away": "Ipswich Town",
-    "rH": 19,
-    "rA": 2,
-    "stakeH": "mid",
-    "stakeA": "cl-direct",
-    "tv": {
-      "label": "Viaplay",
-      "cls": "viaplay",
-      "free": false
-    },
-    "legScore": null
-  },
-  {
-    "sk": "2026-04-22 20:45",
-    "day": "Wo 22 apr",
-    "date": "2026-04-22",
-    "time": "20:45",
     "comp": "DFB-Pokal",
     "leagueKey": "dfbpokal",
     "flag": "🇩🇪",
@@ -142,6 +58,27 @@
     "tv": {
       "label": "Ziggo Sport 2",
       "cls": "ziggo",
+      "free": false
+    },
+    "legScore": null
+  },
+  {
+    "sk": "2026-04-22 20:45",
+    "day": "Wo 22 apr",
+    "date": "2026-04-22",
+    "time": "20:45",
+    "comp": "Championship",
+    "leagueKey": "champ",
+    "flag": "ENG",
+    "home": "Charlton Athletic",
+    "away": "Ipswich Town",
+    "rH": 20,
+    "rA": 3,
+    "stakeH": "mid",
+    "stakeA": "cl-pre",
+    "tv": {
+      "label": "Viaplay",
+      "cls": "viaplay",
       "free": false
     },
     "legScore": null
@@ -198,7 +135,7 @@
     "flag": "ENG",
     "home": "Bournemouth",
     "away": "Leeds United",
-    "rH": 8,
+    "rH": 9,
     "rA": 15,
     "stakeH": "mid",
     "stakeA": "mid",
