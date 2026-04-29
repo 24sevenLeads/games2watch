@@ -1,47 +1,5 @@
 [
   {
-    "sk": "2026-04-29 18:45",
-    "day": "Wo 29 apr",
-    "date": "2026-04-29",
-    "time": "18:45",
-    "comp": "Keuken Kampioen Divisie",
-    "leagueKey": "kkd",
-    "flag": "🇳🇱",
-    "home": "FC Den Bosch",
-    "away": "Almere City FC",
-    "rH": 9,
-    "rA": 5,
-    "stakeH": "mid",
-    "stakeA": "cl-pre",
-    "tv": {
-      "label": "ESPN",
-      "cls": "espn",
-      "free": true
-    },
-    "legScore": null
-  },
-  {
-    "sk": "2026-04-29 21:00",
-    "day": "Wo 29 apr",
-    "date": "2026-04-29",
-    "time": "21:00",
-    "comp": "Champions League",
-    "leagueKey": "cl",
-    "flag": "🏆",
-    "home": "Atlético Madrid",
-    "away": "Arsenal",
-    "rH": null,
-    "rA": null,
-    "stakeH": "mid",
-    "stakeA": "mid",
-    "tv": {
-      "label": "Ziggo Sport",
-      "cls": "ziggo",
-      "free": false
-    },
-    "legScore": null
-  },
-  {
     "sk": "2026-04-30 21:00",
     "day": "Do 30 apr",
     "date": "2026-04-30",
