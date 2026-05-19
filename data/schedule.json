@@ -1,47 +1,5 @@
 [
   {
-    "sk": "2026-05-19 20:30",
-    "day": "Di 19 mei",
-    "date": "2026-05-19",
-    "time": "20:30",
-    "comp": "Premier League",
-    "leagueKey": "pl",
-    "flag": "ENG",
-    "home": "Bournemouth",
-    "away": "Manchester City",
-    "rH": 6,
-    "rA": 2,
-    "stakeH": "el-direct",
-    "stakeA": "champ",
-    "tv": {
-      "label": "Prime Video",
-      "cls": "prime",
-      "free": false
-    },
-    "legScore": null
-  },
-  {
-    "sk": "2026-05-19 21:15",
-    "day": "Di 19 mei",
-    "date": "2026-05-19",
-    "time": "21:15",
-    "comp": "Premier League",
-    "leagueKey": "pl",
-    "flag": "ENG",
-    "home": "Chelsea",
-    "away": "Tottenham Hotspur",
-    "rH": 10,
-    "rA": 17,
-    "stakeH": "mid",
-    "stakeA": "mid",
-    "tv": {
-      "label": "Viaplay",
-      "cls": "viaplay",
-      "free": false
-    },
-    "legScore": null
-  },
-  {
     "sk": "2026-05-20 18:45",
     "day": "Wo 20 mei",
     "date": "2026-05-20",
