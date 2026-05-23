@@ -1,89 +1,5 @@
 [
   {
-    "sk": "2026-05-23 16:30",
-    "day": "Za 23 mei",
-    "date": "2026-05-23",
-    "time": "16:30",
-    "comp": "Keuken Kampioen Divisie",
-    "leagueKey": "kkd",
-    "flag": "🇳🇱",
-    "home": "FC Volendam",
-    "away": "Willem II",
-    "rH": null,
-    "rA": 3,
-    "stakeH": "mid",
-    "stakeA": "cl-pre",
-    "tv": {
-      "label": "Star Channel",
-      "cls": "other",
-      "free": true
-    },
-    "legScore": null
-  },
-  {
-    "sk": "2026-05-23 17:30",
-    "day": "Za 23 mei",
-    "date": "2026-05-23",
-    "time": "17:30",
-    "comp": "Championship",
-    "leagueKey": "champ",
-    "flag": "ENG",
-    "home": "Hull City",
-    "away": "Southampton",
-    "rH": 6,
-    "rA": 4,
-    "stakeH": "cl-pre",
-    "stakeA": "cl-pre",
-    "tv": {
-      "label": "Viaplay",
-      "cls": "viaplay",
-      "free": false
-    },
-    "legScore": null
-  },
-  {
-    "sk": "2026-05-23 18:00",
-    "day": "Za 23 mei",
-    "date": "2026-05-23",
-    "time": "18:00",
-    "comp": "Serie A",
-    "leagueKey": "sa",
-    "flag": "🇮🇹",
-    "home": "Bologna F.C. 1909",
-    "away": "Inter Milan",
-    "rH": 8,
-    "rA": 1,
-    "stakeH": "conf",
-    "stakeA": "champ",
-    "tv": {
-      "label": "Ziggo Sport 2",
-      "cls": "ziggo",
-      "free": false
-    },
-    "legScore": null
-  },
-  {
-    "sk": "2026-05-23 20:00",
-    "day": "Za 23 mei",
-    "date": "2026-05-23",
-    "time": "20:00",
-    "comp": "DFB-Pokal",
-    "leagueKey": "dfbpokal",
-    "flag": "🇩🇪",
-    "home": "Bayern München",
-    "away": "VfB Stuttgart",
-    "rH": null,
-    "rA": null,
-    "stakeH": "mid",
-    "stakeA": "mid",
-    "tv": {
-      "label": "Ziggo Sport",
-      "cls": "ziggo",
-      "free": false
-    },
-    "legScore": null
-  },
-  {
     "sk": "2026-05-24 12:15",
     "day": "Zo 24 mei",
     "date": "2026-05-24",
@@ -121,27 +37,6 @@
     "tv": {
       "label": "Ziggo Sport",
       "cls": "ziggo",
-      "free": false
-    },
-    "legScore": null
-  },
-  {
-    "sk": "2026-05-24 17:00",
-    "day": "Zo 24 mei",
-    "date": "2026-05-24",
-    "time": "17:00",
-    "comp": "Premier League",
-    "leagueKey": "pl",
-    "flag": "ENG",
-    "home": "Fulham",
-    "away": "Newcastle United",
-    "rH": 13,
-    "rA": 11,
-    "stakeH": "mid",
-    "stakeA": "mid",
-    "tv": {
-      "label": "Viaplay",
-      "cls": "viaplay",
       "free": false
     },
     "legScore": null
@@ -243,6 +138,27 @@
     "rH": 5,
     "rA": 9,
     "stakeH": "cl-direct",
+    "stakeA": "mid",
+    "tv": {
+      "label": "Viaplay",
+      "cls": "viaplay",
+      "free": false
+    },
+    "legScore": null
+  },
+  {
+    "sk": "2026-05-24 17:00",
+    "day": "Zo 24 mei",
+    "date": "2026-05-24",
+    "time": "17:00",
+    "comp": "Premier League",
+    "leagueKey": "pl",
+    "flag": "ENG",
+    "home": "Fulham",
+    "away": "Newcastle United",
+    "rH": 13,
+    "rA": 11,
+    "stakeH": "mid",
     "stakeA": "mid",
     "tv": {
       "label": "Viaplay",
