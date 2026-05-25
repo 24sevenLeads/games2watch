@@ -1,26 +1,5 @@
 [
   {
-    "sk": "2026-05-25 20:30",
-    "day": "Ma 25 mei",
-    "date": "2026-05-25",
-    "time": "20:30",
-    "comp": "Bundesliga",
-    "leagueKey": "bl",
-    "flag": "🇩🇪",
-    "home": "SC Paderborn 07",
-    "away": "VfL Wolfsburg",
-    "rH": null,
-    "rA": 16,
-    "stakeH": "mid",
-    "stakeA": "rel-playoff",
-    "tv": {
-      "label": "Viaplay",
-      "cls": "viaplay",
-      "free": false
-    },
-    "legScore": null
-  },
-  {
     "sk": "2026-05-26 20:30",
     "day": "Di 26 mei",
     "date": "2026-05-26",
