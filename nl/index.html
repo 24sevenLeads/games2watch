@@ -215,7 +215,7 @@ const BADGE_LABELS_OVERRIDE = {
   bl2:    { champ:'Naar Bundesliga', 'cl-direct':'Naar Bundesliga', 'cl-pre':'Relegatie play-offs', 'rel-direct':'Degradatie', 'rel-playoff':'Degr. play-offs' },
 };
 
-let MATCHES = [{"sk": "2026-05-27 21:00", "day": "Wo 27 mei", "date": "2026-05-27", "time": "21:00", "comp": "Conference League", "leagueKey": "conf", "flag": "🏆", "home": "Crystal Palace", "away": "Rayo Vallecano", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport", "cls": "ziggo", "free": false}, "legScore": null}, {"sk": "2026-05-29 20:45", "day": "Vr 29 mei", "date": "2026-05-29", "time": "20:45", "comp": "Ligue 1", "leagueKey": "l1", "flag": "🇫🇷", "home": "OGC Nice", "away": "AS Saint-Étienne", "rH": 16, "rA": null, "stakeH": "rel-playoff", "stakeA": "mid", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}, {"sk": "2026-05-30 18:00", "day": "Za 30 mei", "date": "2026-05-30", "time": "18:00", "comp": "Champions League", "leagueKey": "cl", "flag": "🏆", "home": "Paris Saint-Germain F.C.", "away": "Arsenal", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport", "cls": "ziggo", "free": false}, "legScore": null}];iveLeague = null;
+let MATCHES = [{"sk": "2026-05-29 20:45", "day": "Vr 29 mei", "date": "2026-05-29", "time": "20:45", "comp": "Ligue 1", "leagueKey": "l1", "flag": "🇫🇷", "home": "OGC Nice", "away": "AS Saint-Étienne", "rH": 16, "rA": null, "stakeH": "rel-playoff", "stakeA": "mid", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}, {"sk": "2026-05-30 18:00", "day": "Za 30 mei", "date": "2026-05-30", "time": "18:00", "comp": "Champions League", "leagueKey": "cl", "flag": "🏆", "home": "Paris Saint-Germain F.C.", "away": "Arsenal", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport", "cls": "ziggo", "free": false}, "legScore": null}];iveLeague = null;
 let activeLeague  = null;
 let activeCountry = null;
 let activeLegend  = null;
@@ -392,7 +392,7 @@ function render(){
 
 
 async function loadMatches(){
-  document.getElementById('fetch-status').textContent='Speelschema bijgewerkt: di 26 mei 23:56';
+  document.getElementById('fetch-status').textContent='Speelschema bijgewerkt: wo 27 mei 23:53';
   render();
 }
 

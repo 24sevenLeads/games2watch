@@ -1,26 +1,5 @@
 [
   {
-    "sk": "2026-05-27 21:00",
-    "day": "Wo 27 mei",
-    "date": "2026-05-27",
-    "time": "21:00",
-    "comp": "Conference League",
-    "leagueKey": "conf",
-    "flag": "🏆",
-    "home": "Crystal Palace",
-    "away": "Rayo Vallecano",
-    "rH": null,
-    "rA": null,
-    "stakeH": "mid",
-    "stakeA": "mid",
-    "tv": {
-      "label": "Ziggo Sport",
-      "cls": "ziggo",
-      "free": false
-    },
-    "legScore": null
-  },
-  {
     "sk": "2026-05-29 20:45",
     "day": "Vr 29 mei",
     "date": "2026-05-29",
