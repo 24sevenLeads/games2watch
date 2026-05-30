@@ -1,26 +1,5 @@
 [
   {
-    "sk": "2026-05-29 20:45",
-    "day": "Vr 29 mei",
-    "date": "2026-05-29",
-    "time": "20:45",
-    "comp": "Ligue 1",
-    "leagueKey": "l1",
-    "flag": "🇫🇷",
-    "home": "OGC Nice",
-    "away": "AS Saint-Étienne",
-    "rH": 16,
-    "rA": null,
-    "stakeH": "rel-playoff",
-    "stakeA": "mid",
-    "tv": {
-      "label": "Viaplay",
-      "cls": "viaplay",
-      "free": false
-    },
-    "legScore": null
-  },
-  {
     "sk": "2026-05-30 18:00",
     "day": "Za 30 mei",
     "date": "2026-05-30",
