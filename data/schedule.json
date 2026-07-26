@@ -1,1 +1,23 @@
-[]
+[
+  {
+    "sk": "2026-07-30 20:00",
+    "day": "Do 30 jul",
+    "date": "2026-07-30",
+    "time": "20:00",
+    "comp": "Conference League",
+    "leagueKey": "conf",
+    "flag": "🏆",
+    "home": "Ajax",
+    "away": "FK Vojvodina",
+    "rH": null,
+    "rA": null,
+    "stakeH": "mid",
+    "stakeA": "mid",
+    "tv": {
+      "label": "Ziggo Sport",
+      "cls": "ziggo",
+      "free": false
+    },
+    "legScore": null
+  }
+]
