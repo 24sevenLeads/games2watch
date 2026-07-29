@@ -19,5 +19,26 @@
       "free": false
     },
     "legScore": null
+  },
+  {
+    "sk": "2026-07-30 20:30",
+    "day": "Do 30 jul",
+    "date": "2026-07-30",
+    "time": "20:30",
+    "comp": "Europa League",
+    "leagueKey": "el",
+    "flag": "🏆",
+    "home": "Ferencvárosi TC",
+    "away": "FC Twente",
+    "rH": null,
+    "rA": null,
+    "stakeH": "mid",
+    "stakeA": "mid",
+    "tv": {
+      "label": "ESPN",
+      "cls": "espn",
+      "free": true
+    },
+    "legScore": null
   }
 ]
