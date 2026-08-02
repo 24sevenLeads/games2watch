@@ -215,7 +215,7 @@ const BADGE_LABELS_OVERRIDE = {
   bl2:    { champ:'Naar Bundesliga', 'cl-direct':'Naar Bundesliga', 'cl-pre':'Relegatie play-offs', 'rel-direct':'Degradatie', 'rel-playoff':'Degr. play-offs' },
 };
 
-let MATCHES = [];iveLeague = null;
+let MATCHES = [{"sk": "2026-08-04 20:00", "day": "Di 4 aug", "date": "2026-08-04", "time": "20:00", "comp": "Champions League", "leagueKey": "cl", "flag": "🏆", "home": "Olympiacos F.C.", "away": "NEC", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport", "cls": "ziggo", "free": false}, "legScore": null}, {"sk": "2026-08-06 20:00", "day": "Do 6 aug", "date": "2026-08-06", "time": "20:00", "comp": "Conference League", "leagueKey": "conf", "flag": "🏆", "home": "Ajax", "away": "Shelbourne F.C.", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport", "cls": "ziggo", "free": false}, "legScore": null}, {"sk": "2026-08-06 20:00", "day": "Do 6 aug", "date": "2026-08-06", "time": "20:00", "comp": "Conference League", "leagueKey": "conf", "flag": "🏆", "home": "FC Twente", "away": "FK DAC 1904 Dunajská Streda", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "ESPN", "cls": "espn", "free": true}, "legScore": null}];iveLeague = null;
 let activeLeague  = null;
 let activeCountry = null;
 let activeLegend  = null;
@@ -392,7 +392,7 @@ function render(){
 
 
 async function loadMatches(){
-  document.getElementById('fetch-status').textContent='Speelschema bijgewerkt: za 1 aug 23:45';
+  document.getElementById('fetch-status').textContent='Speelschema bijgewerkt: zo 2 aug 23:48';
   render();
 }
 
