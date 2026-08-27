@@ -110,13 +110,13 @@
     "Fiorentina": 20
   },
   "ll": {
-    "Sevilla FC": 1,
-    "Real Betis": 2,
-    "Deportivo Alavés": 3,
-    "Atlético Madrid": 4,
-    "FC Barcelona": 5,
-    "RCD Espanyol de Barcelona": 6,
-    "Real Madrid C.F.": 7,
+    "Real Madrid C.F.": 1,
+    "Sevilla FC": 2,
+    "Real Betis": 3,
+    "Deportivo Alavés": 4,
+    "Atlético Madrid": 5,
+    "FC Barcelona": 6,
+    "RCD Espanyol de Barcelona": 7,
     "Getafe CF": 8,
     "Villarreal CF": 9,
     "RC Deportivo La Coruña": 10,
@@ -128,8 +128,8 @@
     "Málaga CF": 16,
     "Levante UD": 17,
     "Elche CF": 18,
-    "Real Sociedad": 19,
-    "Athletic Club": 20
+    "Athletic Club": 19,
+    "Real Sociedad": 20
   },
   "l1": {
     "Olympique de Marseille": 1,
