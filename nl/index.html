@@ -215,7 +215,7 @@ const BADGE_LABELS_OVERRIDE = {
   bl2:    { champ:'Naar Bundesliga', 'cl-direct':'Naar Bundesliga', 'cl-pre':'Relegatie play-offs', 'rel-direct':'Degradatie', 'rel-playoff':'Degr. play-offs' },
 };
 
-let MATCHES = [{"sk": "2026-09-02 18:00", "day": "Wo 2 sep", "date": "2026-09-02", "time": "18:00", "comp": "Coppa Italia", "leagueKey": "coppaitalia", "flag": "🇮🇹", "home": "Udinese", "away": "Venezia", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport", "cls": "ziggo", "free": false}, "legScore": null}, {"sk": "2026-09-02 20:45", "day": "Wo 2 sep", "date": "2026-09-02", "time": "20:45", "comp": "DFB-Pokal", "leagueKey": "dfbpokal", "flag": "🇩🇪", "home": "VfL Osnabrück", "away": "Bayern München", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport", "cls": "ziggo", "free": false}, "legScore": null}, {"sk": "2026-09-02 21:00", "day": "Wo 2 sep", "date": "2026-09-02", "time": "21:00", "comp": "Championship", "leagueKey": "champ", "flag": "ENG", "home": "Burnley", "away": "Middlesbrough", "rH": 22, "rA": 5, "stakeH": "rel-direct", "stakeA": "cl-pre", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}, {"sk": "2026-09-03 20:45", "day": "Do 3 sep", "date": "2026-09-03", "time": "20:45", "comp": "Ligue 1", "leagueKey": "l1", "flag": "🇫🇷", "home": "Toulouse FC", "away": "Lille OSC", "rH": 16, "rA": 3, "stakeH": "rel-playoff", "stakeA": "cl-pre", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}, {"sk": "2026-09-03 21:00", "day": "Do 3 sep", "date": "2026-09-03", "time": "21:00", "comp": "Coppa Italia", "leagueKey": "coppaitalia", "flag": "🇮🇹", "home": "Cagliari", "away": "Verona", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 2", "cls": "ziggo", "free": false}, "legScore": null}];iveLeague = null;
+let MATCHES = [{"sk": "2026-09-03 20:45", "day": "Do 3 sep", "date": "2026-09-03", "time": "20:45", "comp": "Ligue 1", "leagueKey": "l1", "flag": "🇫🇷", "home": "Toulouse FC", "away": "Lille OSC", "rH": 16, "rA": 3, "stakeH": "rel-playoff", "stakeA": "cl-pre", "tv": {"label": "Viaplay", "cls": "viaplay", "free": false}, "legScore": null}, {"sk": "2026-09-03 21:00", "day": "Do 3 sep", "date": "2026-09-03", "time": "21:00", "comp": "Coppa Italia", "leagueKey": "coppaitalia", "flag": "🇮🇹", "home": "Cagliari", "away": "Verona", "rH": null, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "Ziggo Sport 2", "cls": "ziggo", "free": false}, "legScore": null}];iveLeague = null;
 let activeLeague  = null;
 let activeCountry = null;
 let activeLegend  = null;
@@ -392,7 +392,7 @@ function render(){
 
 
 async function loadMatches(){
-  document.getElementById('fetch-status').textContent='Speelschema bijgewerkt: wo 2 sep 00:38';
+  document.getElementById('fetch-status').textContent='Speelschema bijgewerkt: do 3 sep 00:48';
   render();
 }
 
