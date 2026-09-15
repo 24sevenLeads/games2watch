@@ -1,110 +1,5 @@
 [
   {
-    "sk": "2026-09-14 18:30",
-    "day": "Ma 14 sep",
-    "date": "2026-09-14",
-    "time": "18:30",
-    "comp": "Serie A",
-    "leagueKey": "sa",
-    "flag": "🇮🇹",
-    "home": "Torino",
-    "away": "Roma",
-    "rH": 14,
-    "rA": 2,
-    "stakeH": "mid",
-    "stakeA": "cl-direct",
-    "tv": {
-      "label": "Ziggo Sport",
-      "cls": "ziggo",
-      "free": false
-    },
-    "legScore": null
-  },
-  {
-    "sk": "2026-09-14 20:00",
-    "day": "Ma 14 sep",
-    "date": "2026-09-14",
-    "time": "20:00",
-    "comp": "Keuken Kampioen Divisie",
-    "leagueKey": "kkd",
-    "flag": "🇳🇱",
-    "home": "Jong Utrecht",
-    "away": "Jong Ajax",
-    "rH": 19,
-    "rA": null,
-    "stakeH": "mid",
-    "stakeA": "mid",
-    "tv": {
-      "label": "ESPN",
-      "cls": "espn",
-      "free": true
-    },
-    "legScore": null
-  },
-  {
-    "sk": "2026-09-14 20:00",
-    "day": "Ma 14 sep",
-    "date": "2026-09-14",
-    "time": "20:00",
-    "comp": "Keuken Kampioen Divisie",
-    "leagueKey": "kkd",
-    "flag": "🇳🇱",
-    "home": "Jong PSV",
-    "away": "Jong AZ",
-    "rH": null,
-    "rA": null,
-    "stakeH": "mid",
-    "stakeA": "mid",
-    "tv": {
-      "label": "ESPN 2",
-      "cls": "espn",
-      "free": false
-    },
-    "legScore": null
-  },
-  {
-    "sk": "2026-09-14 20:45",
-    "day": "Ma 14 sep",
-    "date": "2026-09-14",
-    "time": "20:45",
-    "comp": "Serie A",
-    "leagueKey": "sa",
-    "flag": "🇮🇹",
-    "home": "Inter Milan",
-    "away": "Udinese",
-    "rH": 3,
-    "rA": 13,
-    "stakeH": "cl-direct",
-    "stakeA": "mid",
-    "tv": {
-      "label": "Ziggo Sport 2",
-      "cls": "ziggo",
-      "free": false
-    },
-    "legScore": null
-  },
-  {
-    "sk": "2026-09-14 21:00",
-    "day": "Ma 14 sep",
-    "date": "2026-09-14",
-    "time": "21:00",
-    "comp": "Premier League",
-    "leagueKey": "pl",
-    "flag": "ENG",
-    "home": "Leeds United",
-    "away": "Newcastle United",
-    "rH": 11,
-    "rA": 10,
-    "stakeH": "mid",
-    "stakeA": "mid",
-    "tv": {
-      "label": "Viaplay TV",
-      "cls": "viaplay",
-      "free": false
-    },
-    "legScore": null
-  },
-  {
     "sk": "2026-09-15 20:00",
     "day": "Di 15 sep",
     "date": "2026-09-15",
@@ -196,14 +91,14 @@
     "comp": "Europa League",
     "leagueKey": "el",
     "flag": "🏆",
-    "home": "Bayer 04 Leverkusen",
-    "away": "NK Celje",
+    "home": "AC Milan",
+    "away": "S.L. Benfica",
     "rH": null,
     "rA": null,
     "stakeH": "mid",
     "stakeA": "mid",
     "tv": {
-      "label": "Ziggo Sport 3",
+      "label": "Ziggo Sport 2",
       "cls": "ziggo",
       "free": false
     },
@@ -238,14 +133,14 @@
     "comp": "Europa League",
     "leagueKey": "el",
     "flag": "🏆",
-    "home": "AC Milan",
-    "away": "S.L. Benfica",
+    "home": "Bayer 04 Leverkusen",
+    "away": "NK Celje",
     "rH": null,
     "rA": null,
     "stakeH": "mid",
     "stakeA": "mid",
     "tv": {
-      "label": "Ziggo Sport 2",
+      "label": "Ziggo Sport 3",
       "cls": "ziggo",
       "free": false
     },
