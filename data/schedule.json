@@ -1,26 +1,5 @@
 [
   {
-    "sk": "2026-09-15 20:00",
-    "day": "Di 15 sep",
-    "date": "2026-09-15",
-    "time": "20:00",
-    "comp": "Eredivisie",
-    "leagueKey": "ed",
-    "flag": "🇳🇱",
-    "home": "Ajax",
-    "away": "Willem II",
-    "rH": 5,
-    "rA": null,
-    "stakeH": "cl-pre",
-    "stakeA": "mid",
-    "tv": {
-      "label": "ESPN 2",
-      "cls": "espn",
-      "free": false
-    },
-    "legScore": null
-  },
-  {
     "sk": "2026-09-16 18:45",
     "day": "Wo 16 sep",
     "date": "2026-09-16",
@@ -91,14 +70,14 @@
     "comp": "Europa League",
     "leagueKey": "el",
     "flag": "🏆",
-    "home": "AC Milan",
-    "away": "S.L. Benfica",
+    "home": "Bayer 04 Leverkusen",
+    "away": "NK Celje",
     "rH": null,
     "rA": null,
     "stakeH": "mid",
     "stakeA": "mid",
     "tv": {
-      "label": "Ziggo Sport 2",
+      "label": "Ziggo Sport 3",
       "cls": "ziggo",
       "free": false
     },
@@ -133,14 +112,14 @@
     "comp": "Europa League",
     "leagueKey": "el",
     "flag": "🏆",
-    "home": "Bayer 04 Leverkusen",
-    "away": "NK Celje",
+    "home": "AC Milan",
+    "away": "S.L. Benfica",
     "rH": null,
     "rA": null,
     "stakeH": "mid",
     "stakeA": "mid",
     "tv": {
-      "label": "Ziggo Sport 3",
+      "label": "Ziggo Sport 2",
       "cls": "ziggo",
       "free": false
     },
