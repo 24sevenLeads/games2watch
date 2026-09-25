@@ -19,5 +19,110 @@
       "free": true
     },
     "legScore": null
+  },
+  {
+    "sk": "2026-09-26 16:30",
+    "day": "Za 26 sep",
+    "date": "2026-09-26",
+    "time": "16:30",
+    "comp": "Keuken Kampioen Divisie",
+    "leagueKey": "kkd",
+    "flag": "🇳🇱",
+    "home": "Heracles",
+    "away": "Vitesse",
+    "rH": null,
+    "rA": 5,
+    "stakeH": "mid",
+    "stakeA": "cl-pre",
+    "tv": {
+      "label": "ESPN",
+      "cls": "espn",
+      "free": true
+    },
+    "legScore": null
+  },
+  {
+    "sk": "2026-09-26 20:00",
+    "day": "Za 26 sep",
+    "date": "2026-09-26",
+    "time": "20:00",
+    "comp": "Keuken Kampioen Divisie",
+    "leagueKey": "kkd",
+    "flag": "🇳🇱",
+    "home": "FC Volendam",
+    "away": "VVV-Venlo",
+    "rH": 13,
+    "rA": 3,
+    "stakeH": "mid",
+    "stakeA": "cl-pre",
+    "tv": {
+      "label": "ESPN 2",
+      "cls": "espn",
+      "free": false
+    },
+    "legScore": null
+  },
+  {
+    "sk": "2026-09-26 20:00",
+    "day": "Za 26 sep",
+    "date": "2026-09-26",
+    "time": "20:00",
+    "comp": "Keuken Kampioen Divisie",
+    "leagueKey": "kkd",
+    "flag": "🇳🇱",
+    "home": "Roda JC Kerkrade",
+    "away": "RKC Waalwijk",
+    "rH": 8,
+    "rA": 4,
+    "stakeH": "cl-pre",
+    "stakeA": "cl-pre",
+    "tv": {
+      "label": "ESPN 3",
+      "cls": "espn",
+      "free": false
+    },
+    "legScore": null
+  },
+  {
+    "sk": "2026-09-26 20:00",
+    "day": "Za 26 sep",
+    "date": "2026-09-26",
+    "time": "20:00",
+    "comp": "Keuken Kampioen Divisie",
+    "leagueKey": "kkd",
+    "flag": "🇳🇱",
+    "home": "NAC Breda",
+    "away": "FC Eindhoven",
+    "rH": 11,
+    "rA": 12,
+    "stakeH": "mid",
+    "stakeA": "mid",
+    "tv": {
+      "label": "ESPN 4",
+      "cls": "espn",
+      "free": false
+    },
+    "legScore": null
+  },
+  {
+    "sk": "2026-09-27 14:30",
+    "day": "Zo 27 sep",
+    "date": "2026-09-27",
+    "time": "14:30",
+    "comp": "Keuken Kampioen Divisie",
+    "leagueKey": "kkd",
+    "flag": "🇳🇱",
+    "home": "De Graafschap",
+    "away": "FC Den Bosch",
+    "rH": 20,
+    "rA": 16,
+    "stakeH": "mid",
+    "stakeA": "mid",
+    "tv": {
+      "label": "ESPN",
+      "cls": "espn",
+      "free": true
+    },
+    "legScore": null
   }
 ]
