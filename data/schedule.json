@@ -1,26 +1,5 @@
 [
   {
-    "sk": "2026-09-25 21:00",
-    "day": "Vr 25 sep",
-    "date": "2026-09-25",
-    "time": "21:00",
-    "comp": "Keuken Kampioen Divisie",
-    "leagueKey": "kkd",
-    "flag": "🇳🇱",
-    "home": "FC Dordrecht",
-    "away": "Almere City FC",
-    "rH": 19,
-    "rA": 2,
-    "stakeH": "mid",
-    "stakeA": "cl-direct",
-    "tv": {
-      "label": "Star Channel",
-      "cls": "other",
-      "free": true
-    },
-    "legScore": null
-  },
-  {
     "sk": "2026-09-26 16:30",
     "day": "Za 26 sep",
     "date": "2026-09-26",
@@ -49,14 +28,14 @@
     "comp": "Keuken Kampioen Divisie",
     "leagueKey": "kkd",
     "flag": "🇳🇱",
-    "home": "FC Volendam",
-    "away": "VVV-Venlo",
-    "rH": 13,
-    "rA": 3,
+    "home": "NAC Breda",
+    "away": "FC Eindhoven",
+    "rH": 11,
+    "rA": 12,
     "stakeH": "mid",
-    "stakeA": "cl-pre",
+    "stakeA": "mid",
     "tv": {
-      "label": "ESPN 2",
+      "label": "ESPN 4",
       "cls": "espn",
       "free": false
     },
@@ -91,14 +70,14 @@
     "comp": "Keuken Kampioen Divisie",
     "leagueKey": "kkd",
     "flag": "🇳🇱",
-    "home": "NAC Breda",
-    "away": "FC Eindhoven",
-    "rH": 11,
-    "rA": 12,
+    "home": "FC Volendam",
+    "away": "VVV-Venlo",
+    "rH": 13,
+    "rA": 3,
     "stakeH": "mid",
-    "stakeA": "mid",
+    "stakeA": "cl-pre",
     "tv": {
-      "label": "ESPN 4",
+      "label": "ESPN 2",
       "cls": "espn",
       "free": false
     },
