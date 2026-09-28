@@ -215,7 +215,7 @@ const BADGE_LABELS_OVERRIDE = {
   bl2:    { champ:'Naar Bundesliga', 'cl-direct':'Naar Bundesliga', 'cl-pre':'Relegatie play-offs', 'rel-direct':'Degradatie', 'rel-playoff':'Degr. play-offs' },
 };
 
-let MATCHES = [{"sk": "2026-09-27 14:30", "day": "Zo 27 sep", "date": "2026-09-27", "time": "14:30", "comp": "Keuken Kampioen Divisie", "leagueKey": "kkd", "flag": "🇳🇱", "home": "De Graafschap", "away": "FC Den Bosch", "rH": 20, "rA": 16, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "ESPN", "cls": "espn", "free": true}, "legScore": null}];iveLeague = null;
+let MATCHES = [];iveLeague = null;
 let activeLeague  = null;
 let activeCountry = null;
 let activeLegend  = null;
@@ -392,7 +392,7 @@ function render(){
 
 
 async function loadMatches(){
-  document.getElementById('fetch-status').textContent='Speelschema bijgewerkt: zo 27 sep 01:00';
+  document.getElementById('fetch-status').textContent='Speelschema bijgewerkt: ma 28 sep 01:15';
   render();
 }
 
