@@ -174,10 +174,10 @@
   "kkd": {
     "Heracles Almelo": 1,
     "Almere City FC": 2,
-    "MVV Maastricht": 3,
-    "VVV-Venlo": 4,
-    "Roda JC Kerkrade": 5,
-    "FC Emmen": 6,
+    "FC Emmen": 3,
+    "MVV Maastricht": 4,
+    "VVV-Venlo": 5,
+    "Roda JC Kerkrade": 6,
     "RKC Waalwijk": 7,
     "Vitesse": 8,
     "NAC Breda": 9,
@@ -186,12 +186,12 @@
     "Jong PSV": 12,
     "FC Eindhoven": 13,
     "Helmond Sport": 14,
-    "Jong Ajax": 15,
+    "TOP Oss": 15,
     "FC Den Bosch": 16,
-    "FC Dordrecht": 17,
-    "De Graafschap": 18,
-    "Jong FC Utrecht": 19,
-    "TOP Oss": 20
+    "Jong Ajax": 17,
+    "FC Dordrecht": 18,
+    "De Graafschap": 19,
+    "Jong FC Utrecht": 20
   },
   "bl2": {
     "S04": 1,
