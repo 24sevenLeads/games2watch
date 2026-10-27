@@ -1,26 +1,5 @@
 [
   {
-    "sk": "2026-10-26 20:45",
-    "day": "Ma 26 okt",
-    "date": "2026-10-26",
-    "time": "20:45",
-    "comp": "Primeira Liga",
-    "leagueKey": "primeiraliga",
-    "flag": "🇵🇹",
-    "home": "CD Santa Clara",
-    "away": "S.L. Benfica",
-    "rH": 4,
-    "rA": 2,
-    "stakeH": "el-direct",
-    "stakeA": "cl-direct",
-    "tv": {
-      "label": "Ziggo Sport 3",
-      "cls": "ziggo",
-      "free": false
-    },
-    "legScore": null
-  },
-  {
     "sk": "2026-10-27 19:00",
     "day": "Di 27 okt",
     "date": "2026-10-27",
