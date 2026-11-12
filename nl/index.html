@@ -215,7 +215,7 @@ const BADGE_LABELS_OVERRIDE = {
   bl2:    { champ:'Naar Bundesliga', 'cl-direct':'Naar Bundesliga', 'cl-pre':'Relegatie play-offs', 'rel-direct':'Degradatie', 'rel-playoff':'Degr. play-offs' },
 };
 
-let MATCHES = [];iveLeague = null;
+let MATCHES = [{"sk": "2026-11-14 17:30", "day": "Za 14 nov", "date": "2026-11-14", "time": "17:30", "comp": "Keuken Kampioen Divisie", "leagueKey": "kkd", "flag": "🇳🇱", "home": "NAC Breda", "away": "FC Emmen", "rH": 4, "rA": 6, "stakeH": "cl-pre", "stakeA": "cl-pre", "tv": {"label": "ESPN", "cls": "espn", "free": true}, "legScore": null}, {"sk": "2026-11-14 21:00", "day": "Za 14 nov", "date": "2026-11-14", "time": "21:00", "comp": "Keuken Kampioen Divisie", "leagueKey": "kkd", "flag": "🇳🇱", "home": "Roda JC Kerkrade", "away": "FC Volendam", "rH": 5, "rA": 7, "stakeH": "cl-pre", "stakeA": "cl-pre", "tv": {"label": "ESPN 2", "cls": "espn", "free": false}, "legScore": null}, {"sk": "2026-11-14 21:00", "day": "Za 14 nov", "date": "2026-11-14", "time": "21:00", "comp": "Keuken Kampioen Divisie", "leagueKey": "kkd", "flag": "🇳🇱", "home": "FC Dordrecht", "away": "Heracles", "rH": 18, "rA": null, "stakeH": "mid", "stakeA": "mid", "tv": {"label": "ESPN 3", "cls": "espn", "free": false}, "legScore": null}, {"sk": "2026-11-14 21:00", "day": "Za 14 nov", "date": "2026-11-14", "time": "21:00", "comp": "Keuken Kampioen Divisie", "leagueKey": "kkd", "flag": "🇳🇱", "home": "VVV-Venlo", "away": "FC Eindhoven", "rH": 2, "rA": 20, "stakeH": "cl-direct", "stakeA": "mid", "tv": {"label": "ESPN 4", "cls": "espn", "free": false}, "legScore": null}, {"sk": "2026-11-15 15:30", "day": "Zo 15 nov", "date": "2026-11-15", "time": "15:30", "comp": "Keuken Kampioen Divisie", "leagueKey": "kkd", "flag": "🇳🇱", "home": "MVV Maastricht", "away": "Vitesse", "rH": 8, "rA": 10, "stakeH": "cl-pre", "stakeA": "mid", "tv": {"label": "ESPN", "cls": "espn", "free": true}, "legScore": null}];iveLeague = null;
 let activeLeague  = null;
 let activeCountry = null;
 let activeLegend  = null;
@@ -392,7 +392,7 @@ function render(){
 
 
 async function loadMatches(){
-  document.getElementById('fetch-status').textContent='Speelschema bijgewerkt: wo 11 nov 02:20';
+  document.getElementById('fetch-status').textContent='Speelschema bijgewerkt: do 12 nov 03:28';
   render();
 }
 
