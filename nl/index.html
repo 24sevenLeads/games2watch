@@ -215,7 +215,7 @@ const BADGE_LABELS_OVERRIDE = {
   bl2:    { champ:'Naar Bundesliga', 'cl-direct':'Naar Bundesliga', 'cl-pre':'Relegatie play-offs', 'rel-direct':'Degradatie', 'rel-playoff':'Degr. play-offs' },
 };
 
-let MATCHES = [{"sk": "2026-11-15 15:30", "day": "Zo 15 nov", "date": "2026-11-15", "time": "15:30", "comp": "Keuken Kampioen Divisie", "leagueKey": "kkd", "flag": "🇳🇱", "home": "MVV Maastricht", "away": "Vitesse", "rH": 8, "rA": 11, "stakeH": "cl-pre", "stakeA": "mid", "tv": {"label": "ESPN", "cls": "espn", "free": true}, "legScore": null}];iveLeague = null;
+let MATCHES = [];iveLeague = null;
 let activeLeague  = null;
 let activeCountry = null;
 let activeLegend  = null;
@@ -392,7 +392,7 @@ function render(){
 
 
 async function loadMatches(){
-  document.getElementById('fetch-status').textContent='Speelschema bijgewerkt: zo 15 nov 02:14';
+  document.getElementById('fetch-status').textContent='Speelschema bijgewerkt: ma 16 nov 02:27';
   render();
 }
 
